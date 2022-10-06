@@ -1,1 +1,1 @@
-# plonky2-circom
+# Plonky2 verifier in Circom

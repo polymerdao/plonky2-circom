@@ -1,0 +1,26 @@
+[package]
+name = "plonky2_circom_verifier"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "ea48b175" }
+plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "ea48b175" }
+anyhow = "1.0.40"
+log = "0.4.14"
+env_logger = "0.9.0"
+base64 = "0.13.0"
+serde = { version = "1.0.143" }
+serde_json = "1.0.83"
+keccak-hash = "0.10.0"
+sha2 = "0.10"
+itertools = "0.10.0"
+
+[profile.release]
+opt-level = 3
+
+[profile.bench]
+opt-level = 3
+
+[profile.test]
+opt-level = 3

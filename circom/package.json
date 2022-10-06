@@ -1,0 +1,30 @@
+{
+  "name": "plonky2-circom",
+  "version": "0.0.1",
+  "description": "Circom circuits for Plonky2 proof verification",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --max-old-space-size=4000"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "axios": "^0.27.2",
+    "bigint-mod-arith": "^3.1.0",
+    "chai": "^4.3.6",
+    "circom_tester": "0.0.18",
+    "circomlib": "2.0.5",
+    "circomlibjs": "^0.1.7",
+    "eslint": "^8.22.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "fast-check": "^3.1.1",
+    "mocha": "^10.0.0",
+    "mocha-logger": "^1.0.8"
+  },
+  "dependencies": {
+    "snarkjs": "^0.5.0"
+  }
+}
