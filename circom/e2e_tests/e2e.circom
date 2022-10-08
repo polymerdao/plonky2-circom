@@ -17,4 +17,4 @@ template PlonkTest() {
   ceval.out[1] === 16841416332519902625;
 }
 
-component main {public [in, out]} = PlonkTest();
+component main {public [in]} = PlonkTest();
