@@ -1,6 +1,62 @@
 pragma circom 2.0.9;
+include "./constants.circom";
+include "./goldilocks_inverse.circom";
 
 // Gl: Goldilocks
+template GlAdd() {
+  signal input a;
+  signal input b;
+  signal output out;
+
+  var res = (a + b) % Order();
+  var over = a + b >= Order() ? 1 : 0;
+
+  out <-- res;
+  signal tmp1 <-- over;
+  signal tmp2 <== a + b;
+  signal tmp3 <== (1 - tmp1) * tmp2;
+  out === tmp1 * (tmp2 - Order()) + tmp3;
+}
+
+template GlSub() {
+  signal input a;
+  signal input b;
+  signal output out;
+
+  component cadd = GlAdd();
+  cadd.a <== a;
+  cadd.b <== Order() - b;
+  out <== cadd.out;
+}
+
+template GlMul() {
+  signal input a;
+  signal input b;
+  signal output out;
+
+  var r = (a * b) % Order();
+  var d = (a * b - r) / Order();
+
+  out <-- r;
+  signal tmp1 <== a * b - out;
+  signal tmp2 <-- d;
+  tmp1 === Order() * tmp2;
+}
+
+template GlDiv() {
+  signal input a;
+  signal input b;
+  signal output out;
+
+  component cgi = GlInv();
+  cgi.x <== b;
+  component cgm = GlMul();
+  cgm.a <== a;
+  cgm.b <== cgi.out;
+  out <== cgm.out;
+}
+
+
 template GlExp() {
   signal input x;
   signal input n;
@@ -10,118 +66,24 @@ template GlExp() {
   signal temp1[64];
   signal temp2[64];
   signal mul[65];
+  component cmul[64][2];
   mul[0] <== 1;
   e2[0] <== x;
   for (var i = 0; i < 64; i++) {
     temp1[i] <-- (n >> i) & 1;
     temp1[i] * (temp1[i] - 1) === 0;
     temp2[i] <== e2[i] * temp1[i] + 1 - temp1[i];
-    mul[i + 1] <== mul[i] * temp2[i];
-    e2[i + 1] <== e2[i] * e2[i];
+
+    cmul[i][0] = GlMul();
+    cmul[i][1] = GlMul();
+    cmul[i][0].a <== mul[i];
+    cmul[i][0].b <== temp2[i];
+    cmul[i][1].a <== e2[i];
+    cmul[i][1].b <== e2[i];
+
+    mul[i + 1] <== cmul[i][0].out;
+    e2[i + 1] <== cmul[i][1].out;
   }
 
   out <== mul[64];
-}
-
-template GlDiv() {
-  signal input a;
-  signal input b;
-  signal output out;
-
-  signal inv_b;
-  inv_b <-- 1 / b;
-  inv_b * b === 1;
-  out <== a * inv_b;
-}
-
-// GlExt: Goldilocks's quadratic extension
-// out[0] = a[0] * b[0] + 7 * a[1] * b[1]
-// out[1] = a[0] * b[1] + a[1] * b[0]
-template GlExtMul() {
-  signal input a[2];
-  signal input b[2];
-  signal output out[2];
-
-  var W = 7;
-  signal tmp1 <== W * a[1] * b[1];
-  signal tmp2 <== a[1] * b[0];
-
-  out[0] <== a[0] * b[0] + tmp1;
-  out[1] <== a[0] * b[1] + tmp2;
-}
-
-template GlExtDiv() {
-  signal input a[2];
-  signal input b[2];
-  signal output out[2];
-
-  var DTH_ROOT = 18446744069414584320;
-  component cextmul0 = GlExtMul();
-  cextmul0.a[0] <== b[0];
-  cextmul0.a[1] <== b[1] * DTH_ROOT;
-  cextmul0.b[0] <== b[0];
-  cextmul0.b[1] <== b[1];
-
-  signal inv_out0;
-  inv_out0 <-- 1 / cextmul0.out[0];
-  inv_out0 * cextmul0.out[0] === 1;
-
-  component cextmul1 = GlExtMul();
-  cextmul1.a[0] <== a[0];
-  cextmul1.a[1] <== a[1];
-  cextmul1.b[0] <== b[0] * inv_out0;
-  cextmul1.b[1] <== b[1] * DTH_ROOT * inv_out0;
-
-  out[0] <== cextmul1.out[0];
-  out[1] <== cextmul1.out[1];
-}
-
-template GlExtExp() {
-  signal input x[2];
-  signal input n;
-  signal output out[2];
-
-  var W = 7;
-  signal e2[64][2];
-  signal temp1[64];
-  signal temp2[64][2];
-  signal temp3[64];
-  component cextmul[64];
-  for (var i = 0; i < 64; i++) {
-    cextmul[i] = GlExtMul();
-  }
-  cextmul[0].a[0] <== 1;
-  cextmul[0].a[1] <== 0;
-  e2[0][0] <== x[0];
-  e2[0][1] <== x[1];
-
-  for (var i = 0; i < 63; i++) {
-    temp1[i] <-- (n >> i) & 1;
-    temp1[i] * (temp1[i] - 1) === 0;
-
-    temp2[i][0] <== e2[i][0] * temp1[i] + 1 - temp1[i];
-    temp2[i][1] <== e2[i][1] * temp1[i];
-
-    cextmul[i].b[0] <== temp2[i][0];
-    cextmul[i].b[1] <== temp2[i][1] + temp1[i] * (1 - temp1[i]);
-
-    cextmul[i + 1].a[0] <== cextmul[i].out[0];
-    cextmul[i + 1].a[1] <== cextmul[i].out[1];
-
-    temp3[i] <== W * e2[i][1] * e2[i][1];
-    e2[i + 1][0] <== e2[i][0] * e2[i][0] + temp3[i];
-    e2[i + 1][1] <== e2[i][0] * e2[i][1] * 2;
-  }
-
-  temp1[63] <-- (n >> 63) & 1;
-  temp1[63] * (temp1[63] - 1) === 0;
-
-  temp2[63][0] <== e2[63][0] * temp1[63] + 1 - temp1[63];
-  temp2[63][1] <== e2[63][1] * temp1[63];
-
-  cextmul[63].b[0] <== temp2[63][0];
-  cextmul[63].b[1] <== temp2[63][1] + temp1[63] * (1 - temp1[63]);
-
-  out[0] <== cextmul[63].out[0];
-  out[1] <== cextmul[63].out[1];
 }

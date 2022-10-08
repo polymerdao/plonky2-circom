@@ -1,5 +1,5 @@
 pragma circom 2.0.9;
-include "./goldilocks.circom";
+include "./goldilocks_ext.circom";
 
 template EvalL1() {
   signal input n;

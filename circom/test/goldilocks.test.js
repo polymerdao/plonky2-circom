@@ -2,16 +2,13 @@ const path = require("path");
 
 const wasm_tester = require("circom_tester").wasm;
 
-describe("GlExp Circuit Test", function () {
+describe("Goldilocks Circuit Test", function () {
     let circuit;
 
     this.timeout(10000000);
 
     before(async () => {
-        circuit = await wasm_tester(path.join(__dirname, "circuits", "goldilocks.test.circom"), {
-            O: 1,
-            prime: "goldilocks"
-        });
+        circuit = await wasm_tester(path.join(__dirname, "circuits", "goldilocks.test.circom"), {});
     });
 
     it("Should pass", async () => {
