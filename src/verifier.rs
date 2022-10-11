@@ -149,7 +149,7 @@ pub fn generate_verifier_config<
     let proof = &pwpi.proof;
     assert_eq!(proof.opening_proof.query_round_proofs[0].steps.len(), 2);
 
-    const HASH_SIZE: usize = 25;
+    const HASH_SIZE: usize = 32;
     const FIELD_SIZE: usize = 8;
     const EXT_FIELD_SIZE: usize = 16;
     const MERKLE_HEIGHT_SIZE: usize = 1;
@@ -747,11 +747,7 @@ mod tests {
         },
     };
 
-    use crate::config::KeccakGoldilocksConfig2;
-    use crate::verifier::{
-        generate_proof_base64, generate_solidity_verifier, generate_verifier_config,
-        recursive_proof,
-    };
+    use crate::verifier::{generate_proof_base64, generate_verifier_config, recursive_proof};
 
     /// Creates a dummy proof which should have roughly `num_dummy_gates` gates.
     fn dummy_proof<F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, const D: usize>(
@@ -793,7 +789,7 @@ mod tests {
     fn test_verifier_without_public_inputs() -> Result<()> {
         const D: usize = 2;
         type C = PoseidonGoldilocksConfig;
-        type F = <KC2 as GenericConfig<D>>::F;
+        type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
         // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
         let high_rate_config = CircuitConfig {
@@ -818,29 +814,29 @@ mod tests {
             ..high_rate_config
         };
 
-        let (proof, vd, cd) = dummy_proof::<F, KC2, D>(&final_config, 4_000, 0)?;
+        let (proof, _, _) = dummy_proof::<F, C, D>(&final_config, 4_000, 0)?;
 
         let conf = generate_verifier_config(&proof)?;
-        let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
-
-        let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
-        sol_file.write_all(contract.as_bytes())?;
-        sol_file = File::create("./contract/contracts/GatesLib.sol")?;
-        sol_file.write_all(gates_lib.as_bytes())?;
-        sol_file = File::create("./contract/contracts/ProofLib.sol")?;
-        sol_file.write_all(proof_lib.as_bytes())?;
+        // let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
+        //
+        // let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
+        // sol_file.write_all(contract.as_bytes())?;
+        // sol_file = File::create("./contract/contracts/GatesLib.sol")?;
+        // sol_file.write_all(gates_lib.as_bytes())?;
+        // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
+        // sol_file.write_all(proof_lib.as_bytes())?;
 
         let proof_base64 = generate_proof_base64(&proof, &conf)?;
         let proof_json = "[ \"".to_owned() + &proof_base64 + &"\" ]";
 
-        if !Path::new("./contract/test/data").is_dir() {
-            std::fs::create_dir("./contract/test/data")?;
+        if !Path::new("./circom/test/data").is_dir() {
+            std::fs::create_dir("./circom/test/data")?;
         }
 
-        let mut proof_file = File::create("./contract/test/data/proof.json")?;
+        let mut proof_file = File::create("./circom/test/data/proof.json")?;
         proof_file.write_all(proof_json.as_bytes())?;
 
-        let mut conf_file = File::create("./contract/test/data/conf.json")?;
+        let mut conf_file = File::create("./circom/test/data/conf.json")?;
         conf_file.write_all(serde_json::to_string(&conf)?.as_ref())?;
 
         Ok(())
@@ -875,29 +871,29 @@ mod tests {
             ..high_rate_config
         };
 
-        let (proof, vd, cd) = dummy_proof::<F, KC2, D>(&final_config, 4_000, 4)?;
+        let (proof, _, _) = dummy_proof::<F, C, D>(&final_config, 4_000, 4)?;
 
         let conf = generate_verifier_config(&proof)?;
-        let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
+        // let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
 
-        let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
-        sol_file.write_all(contract.as_bytes())?;
-        sol_file = File::create("./contract/contracts/GatesLib.sol")?;
-        sol_file.write_all(gates_lib.as_bytes())?;
-        sol_file = File::create("./contract/contracts/ProofLib.sol")?;
-        sol_file.write_all(proof_lib.as_bytes())?;
+        // let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
+        // sol_file.write_all(contract.as_bytes())?;
+        // sol_file = File::create("./contract/contracts/GatesLib.sol")?;
+        // sol_file.write_all(gates_lib.as_bytes())?;
+        // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
+        // sol_file.write_all(proof_lib.as_bytes())?;
 
         let proof_base64 = generate_proof_base64(&proof, &conf)?;
         let proof_json = "[ \"".to_owned() + &proof_base64 + &"\" ]";
 
-        if !Path::new("./contract/test/data").is_dir() {
-            std::fs::create_dir("./contract/test/data")?;
+        if !Path::new("./circom/test/data").is_dir() {
+            std::fs::create_dir("./circom/test/data")?;
         }
 
-        let mut proof_file = File::create("./contract/test/data/proof.json")?;
+        let mut proof_file = File::create("./circom/test/data/proof.json")?;
         proof_file.write_all(proof_json.as_bytes())?;
 
-        let mut conf_file = File::create("./contract/test/data/conf.json")?;
+        let mut conf_file = File::create("./circom/test/data/conf.json")?;
         conf_file.write_all(serde_json::to_string(&conf)?.as_ref())?;
 
         Ok(())
@@ -908,7 +904,6 @@ mod tests {
         const D: usize = 2;
         type C = PoseidonGoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
-        type KC2 = KeccakGoldilocksConfig2;
         let standard_config = CircuitConfig::standard_recursion_config();
 
         let (proof, vd, cd) = dummy_proof::<F, C, D>(&standard_config, 4_000, 0)?;
@@ -939,30 +934,30 @@ mod tests {
             },
             ..high_rate_config
         };
-        let (proof, vd, cd) =
-            recursive_proof::<F, KC2, C, D>(proof, vd, cd, &final_config, None, true, true)?;
+        let (proof, _, _) =
+            recursive_proof::<F, C, C, D>(proof, vd, cd, &final_config, None, true, true)?;
 
         let conf = generate_verifier_config(&proof)?;
-        let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
-
-        let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
-        sol_file.write_all(contract.as_bytes())?;
-        sol_file = File::create("./contract/contracts/GatesLib.sol")?;
-        sol_file.write_all(gates_lib.as_bytes())?;
-        sol_file = File::create("./contract/contracts/ProofLib.sol")?;
-        sol_file.write_all(proof_lib.as_bytes())?;
+        // let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
+        //
+        // let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
+        // sol_file.write_all(contract.as_bytes())?;
+        // sol_file = File::create("./contract/contracts/GatesLib.sol")?;
+        // sol_file.write_all(gates_lib.as_bytes())?;
+        // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
+        // sol_file.write_all(proof_lib.as_bytes())?;
 
         let proof_base64 = generate_proof_base64(&proof, &conf)?;
         let proof_json = "[ \"".to_owned() + &proof_base64 + &"\" ]";
 
-        if !Path::new("./contract/test/data").is_dir() {
-            std::fs::create_dir("./contract/test/data")?;
+        if !Path::new("./circom/test/data").is_dir() {
+            std::fs::create_dir("./circom/test/data")?;
         }
 
-        let mut proof_file = File::create("./contract/test/data/proof.json")?;
+        let mut proof_file = File::create("./circom/test/data/proof.json")?;
         proof_file.write_all(proof_json.as_bytes())?;
 
-        let mut conf_file = File::create("./contract/test/data/conf.json")?;
+        let mut conf_file = File::create("./circom/test/data/conf.json")?;
         conf_file.write_all(serde_json::to_string(&conf)?.as_ref())?;
 
         Ok(())

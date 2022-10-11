@@ -48,14 +48,13 @@ template GlDiv() {
   signal input b;
   signal output out;
 
-  component cgi = GlInv();
-  cgi.x <== b;
-  component cgm = GlMul();
-  cgm.a <== a;
-  cgm.b <== cgi.out;
-  out <== cgm.out;
+  component inv_b = GlInv();
+  inv_b.x <== b;
+  component a_mul_inv_b = GlMul();
+  a_mul_inv_b.a <== a;
+  a_mul_inv_b.b <== inv_b.out;
+  out <== a_mul_inv_b.out;
 }
-
 
 template GlExp() {
   signal input x;
