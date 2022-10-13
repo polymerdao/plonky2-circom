@@ -78,7 +78,6 @@
 
 pragma circom 2.0.9;
 include "../../circuits/poseidon.circom";
-//include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 template PoseidonTest() {
   signal input in;
@@ -104,14 +103,10 @@ template PoseidonTest() {
   p.capacity[2] <== 0;
   p.capacity[3] <== 0;
 
-  log(p.out[0]);
-  log(p.out[1]);
-  log(p.out[2]);
-  log(p.out[3]);
-  p.out[0] === 0;
-  p.out[1] === 0;
-  p.out[2] === 0;
-  p.out[3] === 0;
+  p.out[0] === 7211848465497282123;
+  p.out[1] === 8334407123774112207;
+  p.out[2] === 4858661444170722461;
+  p.out[3] === 8419634888969461752;
 }
 
 component main = PoseidonTest();

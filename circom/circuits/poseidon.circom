@@ -4,19 +4,27 @@ include "./goldilocks.circom";
 template MDS() {
     signal input in[12];
     signal output out[12];
+    component reduce[12];
+    for (var i = 0; i < 12; i++) {
+        reduce[i] = GlReduce();
+    }
 
-    out[ 0] <== 25*in[0] + 15*in[1] + 41*in[2] + 16*in[3] +  2*in[4] + 28*in[5] + 13*in[6] + 13*in[7] + 39*in[8] + 18*in[9] + 34*in[10] + 20*in[11];
-    out[ 1] <== 20*in[0] + 17*in[1] + 15*in[2] + 41*in[3] + 16*in[4] +  2*in[5] + 28*in[6] + 13*in[7] + 13*in[8] + 39*in[9] + 18*in[10] + 34*in[11];
-    out[ 2] <== 34*in[0] + 20*in[1] + 17*in[2] + 15*in[3] + 41*in[4] + 16*in[5] +  2*in[6] + 28*in[7] + 13*in[8] + 13*in[9] + 39*in[10] + 18*in[11];
-    out[ 3] <== 18*in[0] + 34*in[1] + 20*in[2] + 17*in[3] + 15*in[4] + 41*in[5] + 16*in[6] +  2*in[7] + 28*in[8] + 13*in[9] + 13*in[10] + 39*in[11];
-    out[ 4] <== 39*in[0] + 18*in[1] + 34*in[2] + 20*in[3] + 17*in[4] + 15*in[5] + 41*in[6] + 16*in[7] +  2*in[8] + 28*in[9] + 13*in[10] + 13*in[11];
-    out[ 5] <== 13*in[0] + 39*in[1] + 18*in[2] + 34*in[3] + 20*in[4] + 17*in[5] + 15*in[6] + 41*in[7] + 16*in[8] +  2*in[9] + 28*in[10] + 13*in[11];
-    out[ 6] <== 13*in[0] + 13*in[1] + 39*in[2] + 18*in[3] + 34*in[4] + 20*in[5] + 17*in[6] + 15*in[7] + 41*in[8] + 16*in[9] +  2*in[10] + 28*in[11];
-    out[ 7] <== 28*in[0] + 13*in[1] + 13*in[2] + 39*in[3] + 18*in[4] + 34*in[5] + 20*in[6] + 17*in[7] + 15*in[8] + 41*in[9] + 16*in[10] +  2*in[11];
-    out[ 8] <==  2*in[0] + 28*in[1] + 13*in[2] + 13*in[3] + 39*in[4] + 18*in[5] + 34*in[6] + 20*in[7] + 17*in[8] + 15*in[9] + 41*in[10] + 16*in[11];
-    out[ 9] <== 16*in[0] +  2*in[1] + 28*in[2] + 13*in[3] + 13*in[4] + 39*in[5] + 18*in[6] + 34*in[7] + 20*in[8] + 17*in[9] + 15*in[10] + 41*in[11];
-    out[10] <== 41*in[0] + 16*in[1] +  2*in[2] + 28*in[3] + 13*in[4] + 13*in[5] + 39*in[6] + 18*in[7] + 34*in[8] + 20*in[9] + 17*in[10] + 15*in[11];
-    out[11] <== 15*in[0] + 41*in[1] + 16*in[2] +  2*in[3] + 28*in[4] + 13*in[5] + 13*in[6] + 39*in[7] + 18*in[8] + 34*in[9] + 20*in[10] + 17*in[11];
+    reduce[ 0].x <== 25*in[0] + 15*in[1] + 41*in[2] + 16*in[3] +  2*in[4] + 28*in[5] + 13*in[6] + 13*in[7] + 39*in[8] + 18*in[9] + 34*in[10] + 20*in[11];
+    reduce[ 1].x <== 20*in[0] + 17*in[1] + 15*in[2] + 41*in[3] + 16*in[4] +  2*in[5] + 28*in[6] + 13*in[7] + 13*in[8] + 39*in[9] + 18*in[10] + 34*in[11];
+    reduce[ 2].x <== 34*in[0] + 20*in[1] + 17*in[2] + 15*in[3] + 41*in[4] + 16*in[5] +  2*in[6] + 28*in[7] + 13*in[8] + 13*in[9] + 39*in[10] + 18*in[11];
+    reduce[ 3].x <== 18*in[0] + 34*in[1] + 20*in[2] + 17*in[3] + 15*in[4] + 41*in[5] + 16*in[6] +  2*in[7] + 28*in[8] + 13*in[9] + 13*in[10] + 39*in[11];
+    reduce[ 4].x <== 39*in[0] + 18*in[1] + 34*in[2] + 20*in[3] + 17*in[4] + 15*in[5] + 41*in[6] + 16*in[7] +  2*in[8] + 28*in[9] + 13*in[10] + 13*in[11];
+    reduce[ 5].x <== 13*in[0] + 39*in[1] + 18*in[2] + 34*in[3] + 20*in[4] + 17*in[5] + 15*in[6] + 41*in[7] + 16*in[8] +  2*in[9] + 28*in[10] + 13*in[11];
+    reduce[ 6].x <== 13*in[0] + 13*in[1] + 39*in[2] + 18*in[3] + 34*in[4] + 20*in[5] + 17*in[6] + 15*in[7] + 41*in[8] + 16*in[9] +  2*in[10] + 28*in[11];
+    reduce[ 7].x <== 28*in[0] + 13*in[1] + 13*in[2] + 39*in[3] + 18*in[4] + 34*in[5] + 20*in[6] + 17*in[7] + 15*in[8] + 41*in[9] + 16*in[10] +  2*in[11];
+    reduce[ 8].x <==  2*in[0] + 28*in[1] + 13*in[2] + 13*in[3] + 39*in[4] + 18*in[5] + 34*in[6] + 20*in[7] + 17*in[8] + 15*in[9] + 41*in[10] + 16*in[11];
+    reduce[ 9].x <== 16*in[0] +  2*in[1] + 28*in[2] + 13*in[3] + 13*in[4] + 39*in[5] + 18*in[6] + 34*in[7] + 20*in[8] + 17*in[9] + 15*in[10] + 41*in[11];
+    reduce[10].x <== 41*in[0] + 16*in[1] +  2*in[2] + 28*in[3] + 13*in[4] + 13*in[5] + 39*in[6] + 18*in[7] + 34*in[8] + 20*in[9] + 17*in[10] + 15*in[11];
+    reduce[11].x <== 15*in[0] + 41*in[1] + 16*in[2] +  2*in[3] + 28*in[4] + 13*in[5] + 13*in[6] + 39*in[7] + 18*in[8] + 34*in[9] + 20*in[10] + 17*in[11];
+
+    for (var i = 0; i < 12; i++) {
+        out[i] <== reduce[i].out;
+    }
 }
 
 template Poseidon(nOuts) {
@@ -25,17 +33,17 @@ template Poseidon(nOuts) {
     signal output out[nOuts];
 
     signal state[31][12];
-    signal f1_x2[4][12];
-    signal f1_x4[4][12];
-    signal f1_x6[4][12];
+    component f1_x2[4][12];
+    component f1_x4[4][12];
+    component f1_x6[4][12];
 
-    signal p_x2[22];
-    signal p_x4[22];
-    signal p_x6[22];
+    component p_x2[22];
+    component p_x4[22];
+    component p_x6[22];
 
-    signal f2_x2[4][12];
-    signal f2_x4[4][12];
-    signal f2_x6[4][12];
+    component f2_x2[4][12];
+    component f2_x4[4][12];
+    component f2_x6[4][12];
 
     var const[30*12] = [
         0xb585f766f2144405, 0x7746a55f43921ad7, 0xb2fb0d31cee799b4, 0x0f6760a4803427d7,
@@ -143,10 +151,13 @@ template Poseidon(nOuts) {
         mds[i] = MDS();
         for (var j=0; j<12; j++) {
             var c = const[i*12+j];
-            f1_x2[i][j] <== (state[i][j] + c) * (state[i][j] + c);
-            f1_x4[i][j] <== f1_x2[i][j] * f1_x2[i][j];
-            f1_x6[i][j] <== f1_x2[i][j] * f1_x4[i][j];
-            mds[i].in[j] <== (state[i][j] + c) * f1_x6[i][j];
+            f1_x2[i][j] = GlReduce();
+            f1_x4[i][j] = GlReduce();
+            f1_x6[i][j] = GlReduce();
+            f1_x2[i][j].x <== (state[i][j] + c) * (state[i][j] + c);
+            f1_x4[i][j].x <== f1_x2[i][j].out * f1_x2[i][j].out;
+            f1_x6[i][j].x <== f1_x2[i][j].out * f1_x4[i][j].out;
+            mds[i].in[j] <== (state[i][j] + c) * f1_x6[i][j].out;
         }
         for (var j=0; j<12; j++) {
             state[i+1][j] <== mds[i].out[j];
@@ -156,10 +167,13 @@ template Poseidon(nOuts) {
     for (var i=0; i<22; i++) {
         var c = const[(4+i)*12];
         mds[4+i] = MDS();
-        p_x2[i] <== (state[4+i][0]+c) * (state[4+i][0]+c);
-        p_x4[i] <== p_x2[i] * p_x2[i];
-        p_x6[i] <== p_x2[i] * p_x4[i];
-        mds[4+i].in[0] <== (state[4+i][0]+c) * p_x6[i];
+        p_x2[i] = GlReduce();
+        p_x4[i] = GlReduce();
+        p_x6[i] = GlReduce();
+        p_x2[i].x <== (state[4+i][0]+c) * (state[4+i][0]+c);
+        p_x4[i].x <== p_x2[i].out * p_x2[i].out;
+        p_x6[i].x <== p_x2[i].out * p_x4[i].out;
+        mds[4+i].in[0] <== (state[4+i][0]+c) * p_x6[i].out;
         for (var j=1; j<12; j++) {
             var c = const[(4+i)*12 +j];
             mds[4+i].in[j] <== state[4+i][j] + c;
@@ -175,10 +189,13 @@ template Poseidon(nOuts) {
         mds[26+i] = MDS();
         for (var j=0; j<12; j++) {
             var c = const[(26+i)*12+j];
-            f2_x2[i][j] <== (state[26+i][j]+c) * (state[26+i][j]+c);
-            f2_x4[i][j] <== f2_x2[i][j] * f2_x2[i][j];
-            f2_x6[i][j] <== f2_x2[i][j] * f2_x4[i][j];
-            mds[26+i].in[j] <== (state[26+i][j]+c) * f2_x6[i][j];
+            f2_x2[i][j] = GlReduce();
+            f2_x4[i][j] = GlReduce();
+            f2_x6[i][j] = GlReduce();
+            f2_x2[i][j].x <== (state[26+i][j]+c) * (state[26+i][j]+c);
+            f2_x4[i][j].x <== f2_x2[i][j].out * f2_x2[i][j].out;
+            f2_x6[i][j].x <== f2_x2[i][j].out * f2_x4[i][j].out;
+            mds[26+i].in[j] <== (state[26+i][j]+c) * f2_x6[i][j].out;
         }
         for (var j=0; j<12; j++) {
             state[26+i+1][j] <== mds[26+i].out[j];
