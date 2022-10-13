@@ -26,6 +26,11 @@ template VerifyFriProof() {
   signal input fri_final_poly_ext_v[NUM_FRI_FINAL_POLY_EXT_V()][2];
   signal input fri_pow_witness;
 
+  signal input fri_alpha[2];
+  signal input fri_betas[NUM_FRI_COMMIT_ROUND()][2];
+  signal input fri_pow_response;
+  signal input fri_query_indices[NUM_FRI_QUERY_ROUND()];
+
   signal output res;
 
   res <== 1;
