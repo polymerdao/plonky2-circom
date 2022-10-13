@@ -29,18 +29,25 @@ template GlSub() {
   out <== cadd.out;
 }
 
+template GlReduce() {
+  signal input x;
+  signal output out;
+
+  var r = x % Order();
+  var d = (x - r) / Order();
+  out <-- r;
+  signal tmp <-- d;
+  tmp * Order() + out === x;
+}
+
 template GlMul() {
   signal input a;
   signal input b;
   signal output out;
 
-  var r = (a * b) % Order();
-  var d = (a * b - r) / Order();
-
-  out <-- r;
-  signal tmp1 <== a * b - out;
-  signal tmp2 <-- d;
-  tmp1 === Order() * tmp2;
+  component cr = GlReduce();
+  cr.x <== a * b;
+  out <== cr.out;
 }
 
 template GlDiv() {
