@@ -1,0 +1,16 @@
+pragma circom 2.0.9;
+
+// Order of Goldilocks field
+function Order() { return 18446744069414584321; }
+
+function W() { return 7; }
+
+function DTH_ROOT() { return 18446744069414584320; }
+
+function NUM_OPENINGS_CONSTANTS() { return $NUM_OPENINGS_CONSTANTS; }
+function NUM_OPENINGS_PLONK_SIGMAS() { return $NUM_OPENINGS_PLONK_SIGMAS; }
+function NUM_OPENINGS_WIRES() { return $NUM_OPENINGS_WIRES; }
+function NUM_OPENINGS_PLONK_ZS() { return $NUM_OPENINGS_PLONK_ZS0; }
+function NUM_OPENINGS_PLONK_ZS_NEXT() { return $NUM_OPENINGS_PLONK_ZS_NEXT; }
+function NUM_OPENINGS_PARTIAL_PRODUCTS() { return $NUM_OPENINGS_PARTIAL_PRODUCTS; }
+function NUM_OPENINGS_QUOTIENT_POLYS() { return $NUM_OPENINGS_QUOTIENT_POLYS; }

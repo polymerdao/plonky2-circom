@@ -260,7 +260,7 @@ pub fn generate_proof_base64<
     Ok(base64::encode(proof_bytes))
 }
 
-pub fn generate_solidity_verifier<
+pub fn generate_circom_verifier<
     F: RichField + Extendable<D>,
     C: GenericConfig<D, F = F>,
     const D: usize,
@@ -269,17 +269,12 @@ pub fn generate_solidity_verifier<
     common: &CommonCircuitData<F, C, D>,
     verifier_only: &VerifierOnlyCircuitData<C, D>,
 ) -> anyhow::Result<(String, String, String)> {
-    assert_eq!(
-        25,
-        C::Hasher::HASH_SIZE,
-        "Only support KeccakHash<25> right now"
-    );
     assert_eq!(F::BITS, 64);
     assert_eq!(F::Extension::BITS, 128);
     println!("Generating solidity verifier files ...");
 
     // Load template contract
-    let mut contract = std::fs::read_to_string("./src/template_main.sol")
+    let mut constants = std::fs::read_to_string("./src/template_constants.circom")
         .expect("Something went wrong reading the file");
 
     let k_is = &common.k_is;
@@ -291,7 +286,7 @@ pub fn generate_solidity_verifier<
             + &*k_is[i].to_canonical_u64().to_string()
             + ";\n");
     }
-    contract = contract.replace("        $SET_K_IS;\n", &*k_is_str);
+    constants = constants.replace("        $SET_K_IS;\n", &*k_is_str);
 
     let reduction_arity_bits = &common.fri_params.reduction_arity_bits;
     let mut reduction_arity_bits_str = "".to_owned();
@@ -302,181 +297,181 @@ pub fn generate_solidity_verifier<
             + &*reduction_arity_bits[i].to_string()
             + ";\n");
     }
-    contract = contract.replace(
+    constants = constants.replace(
         "        $SET_REDUCTION_ARITY_BITS;\n",
         &*reduction_arity_bits_str,
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_REDUCTION_ARITY_BITS",
         &*reduction_arity_bits.len().to_string(),
     );
 
-    contract = contract.replace("$NUM_WIRES_CAP", &*conf.num_wires_cap.to_string());
-    contract = contract.replace(
+    constants = constants.replace("$NUM_WIRES_CAP", &*conf.num_wires_cap.to_string());
+    constants = constants.replace(
         "$NUM_PLONK_ZS_PARTIAL_PRODUCTS_CAP",
         &*conf.num_plonk_zs_partial_products_cap.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_QUOTIENT_POLYS_CAP",
         &*conf.num_quotient_polys_cap.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_OPENINGS_CONSTANTS",
         &*conf.num_openings_constants.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_OPENINGS_PLONK_SIGMAS",
         &*conf.num_openings_plonk_sigmas.to_string(),
     );
-    contract = contract.replace("$NUM_OPENINGS_WIRES", &*conf.num_openings_wires.to_string());
-    contract = contract.replace(
+    constants = constants.replace("$NUM_OPENINGS_WIRES", &*conf.num_openings_wires.to_string());
+    constants = constants.replace(
         "$NUM_OPENINGS_PLONK_ZS0",
         &*conf.num_openings_plonk_zs.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_OPENINGS_PLONK_ZS_NEXT",
         &*conf.num_openings_plonk_zs_next.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_OPENINGS_PARTIAL_PRODUCTS",
         &*conf.num_openings_partial_products.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_OPENINGS_QUOTIENT_POLYS",
         &*conf.num_openings_quotient_polys.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_COMMIT_ROUND",
         &*conf.num_fri_commit_round.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$FRI_COMMIT_MERKLE_CAP_HEIGHT",
         &*conf.fri_commit_merkle_cap_height.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_ROUND",
         &*conf.num_fri_query_round.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V",
         &*conf.num_fri_query_init_constants_sigmas_v.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_P",
         &*conf.num_fri_query_init_constants_sigmas_p.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_INIT_WIRES_V",
         &*conf.num_fri_query_init_wires_v.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_INIT_WIRES_P",
         &*conf.num_fri_query_init_wires_p.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_INIT_ZS_PARTIAL_V",
         &*conf.num_fri_query_init_zs_partial_v.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_INIT_ZS_PARTIAL_P",
         &*conf.num_fri_query_init_zs_partial_p.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_INIT_QUOTIENT_V",
         &*conf.num_fri_query_init_quotient_v.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_INIT_QUOTIENT_P",
         &*conf.num_fri_query_init_quotient_p.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_STEP0_V",
         &*conf.num_fri_query_step0_v.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_STEP0_P",
         &*conf.num_fri_query_step0_p.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_STEP1_V",
         &*conf.num_fri_query_step1_v.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_QUERY_STEP1_P",
         &*conf.num_fri_query_step1_p.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_FRI_FINAL_POLY_EXT_V",
         &*conf.num_fri_final_poly_ext_v.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$NUM_CHALLENGES",
         &*common.config.num_challenges.to_string(),
     );
 
     let circuit_digest = common.circuit_digest;
-    contract = contract.replace(
+    constants = constants.replace(
         "$CIRCUIT_DIGEST",
         &*("0x".to_owned() + &encode_hex(&circuit_digest.to_bytes())),
     );
 
-    contract = contract.replace(
+    constants = constants.replace(
         "$FRI_RATE_BITS",
         &*common.config.fri_config.rate_bits.to_string(),
     );
-    contract = contract.replace("$DEGREE_BITS", &*common.degree_bits.to_string());
-    contract = contract.replace(
+    constants = constants.replace("$DEGREE_BITS", &*common.degree_bits.to_string());
+    constants = constants.replace(
         "$NUM_GATE_CONSTRAINTS",
         &*common.num_gate_constraints.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$QUOTIENT_DEGREE_FACTOR",
         &*common.quotient_degree_factor.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$MIN_FRI_POW_RESPONSE",
         &*(common.config.fri_config.proof_of_work_bits + (64 - F::order().bits()) as u32)
             .to_string(),
     );
     let g = F::Extension::primitive_root_of_unity(common.degree_bits);
-    contract = contract.replace(
+    constants = constants.replace(
         "$G_FROM_DEGREE_BITS_0",
         &g.to_basefield_array()[0].to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$G_FROM_DEGREE_BITS_1",
         &g.to_basefield_array()[1].to_string(),
     );
     let log_n = log2_strict(common.fri_params.lde_size());
-    contract = contract.replace("$LOG_SIZE_OF_LDE_DOMAIN", &*log_n.to_string());
-    contract = contract.replace(
+    constants = constants.replace("$LOG_SIZE_OF_LDE_DOMAIN", &*log_n.to_string());
+    constants = constants.replace(
         "$MULTIPLICATIVE_GROUP_GENERATOR",
         &*F::MULTIPLICATIVE_GROUP_GENERATOR.to_string(),
     );
-    contract = contract.replace(
+    constants = constants.replace(
         "$PRIMITIVE_ROOT_OF_UNITY_LDE",
         &*F::primitive_root_of_unity(log_n).to_string(),
     );
     // TODO: add test with config zero_knoledge = true
-    contract = contract.replace(
+    constants = constants.replace(
         "$ZERO_KNOWLEDGE",
         &*common.config.zero_knowledge.to_string(),
     );
     let g = F::primitive_root_of_unity(1);
-    contract = contract.replace("$G_ARITY_BITS_1", &g.to_string());
+    constants = constants.replace("$G_ARITY_BITS_1", &g.to_string());
     let g = F::primitive_root_of_unity(2);
-    contract = contract.replace("$G_ARITY_BITS_2", &g.to_string());
+    constants = constants.replace("$G_ARITY_BITS_2", &g.to_string());
     let g = F::primitive_root_of_unity(3);
-    contract = contract.replace("$G_ARITY_BITS_3", &g.to_string());
+    constants = constants.replace("$G_ARITY_BITS_3", &g.to_string());
     let g = F::primitive_root_of_unity(4);
-    contract = contract.replace("$G_ARITY_BITS_4", &g.to_string());
+    constants = constants.replace("$G_ARITY_BITS_4", &g.to_string());
 
     // Load gate template
-    let mut gates_lib = std::fs::read_to_string("./src/template_gates.sol")
+    let mut gates_lib = std::fs::read_to_string("./src/template_constants.circom")
         .expect("Something went wrong reading the file");
 
     let num_selectors = common.selectors_info.num_selectors();
-    contract = contract.replace("$NUM_SELECTORS", &num_selectors.to_string());
+    constants = constants.replace("$NUM_SELECTORS", &num_selectors.to_string());
     let mut evaluate_gate_constraints_str = "".to_owned();
     for (row, gate) in common.gates.iter().enumerate() {
         if gate.0.id().eq("NoopGate") {
@@ -554,7 +549,7 @@ pub fn generate_solidity_verifier<
         evaluate_gate_constraints_str += &*eval_str;
         evaluate_gate_constraints_str += "        }\n";
     }
-    contract = contract.replace(
+    constants = constants.replace(
         "        $EVALUATE_GATE_CONSTRAINTS;",
         &evaluate_gate_constraints_str[0..evaluate_gate_constraints_str.len() - 1],
     );
@@ -573,7 +568,7 @@ pub fn generate_solidity_verifier<
     gates_lib = gates_lib.replace("$F_EXT_W", &*F::W.to_basefield_array()[0].to_string());
 
     // Load proof template
-    let mut proof_lib = std::fs::read_to_string("./src/template_proof.sol")
+    let mut proof_lib = std::fs::read_to_string("./src/template_constants.circom")
         .expect("Something went wrong reading the file");
 
     let sigma_cap_count = 1 << common.config.fri_config.cap_height;
@@ -719,7 +714,7 @@ pub fn generate_solidity_verifier<
     );
     proof_lib = proof_lib.replace("$NUM_PUBLIC_INPUTS", &*conf.num_public_inputs.to_string());
 
-    Ok((contract, gates_lib, proof_lib))
+    Ok((constants, gates_lib, proof_lib))
 }
 
 #[cfg(test)]
@@ -747,7 +742,9 @@ mod tests {
         },
     };
 
-    use crate::verifier::{generate_proof_base64, generate_verifier_config, recursive_proof};
+    use crate::verifier::{
+        generate_circom_verifier, generate_proof_base64, generate_verifier_config, recursive_proof,
+    };
 
     /// Creates a dummy proof which should have roughly `num_dummy_gates` gates.
     fn dummy_proof<F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, const D: usize>(
@@ -814,13 +811,13 @@ mod tests {
             ..high_rate_config
         };
 
-        let (proof, _, _) = dummy_proof::<F, C, D>(&final_config, 4_000, 0)?;
+        let (proof, vd, cd) = dummy_proof::<F, C, D>(&final_config, 4_000, 0)?;
 
         let conf = generate_verifier_config(&proof)?;
-        // let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
-        //
-        // let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
-        // sol_file.write_all(contract.as_bytes())?;
+        let (circom_constants, _, _) = generate_circom_verifier(&conf, &cd, &vd)?;
+
+        let mut circom_file = File::create("./circom/circuits/constants.circom")?;
+        circom_file.write_all(circom_constants.as_bytes())?;
         // sol_file = File::create("./contract/contracts/GatesLib.sol")?;
         // sol_file.write_all(gates_lib.as_bytes())?;
         // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
