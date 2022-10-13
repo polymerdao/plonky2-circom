@@ -138,6 +138,39 @@ pub struct VerifierConfig {
     num_public_inputs: usize,
 }
 
+#[derive(Serialize)]
+pub struct ProofForCircom {
+    wires_cap: Vec<Vec<u64>>,
+    plonk_zs_partial_products_cap: Vec<Vec<u64>>,
+    quotient_polys_cap: Vec<Vec<u64>>,
+
+    openings_constants: Vec<Vec<u64>>,
+    openings_plonk_sigmas: Vec<Vec<u64>>,
+    openings_wires: Vec<Vec<u64>>,
+    openings_plonk_zs: Vec<Vec<u64>>,
+    openings_plonk_zs_next: Vec<Vec<u64>>,
+    openings_partial_products: Vec<Vec<u64>>,
+    openings_quotient_polys: Vec<Vec<u64>>,
+
+    fri_commit_phase_merkle_caps: Vec<Vec<Vec<u64>>>,
+    fri_query_init_constants_sigmas_v: Vec<Vec<u64>>,
+    fri_query_init_constants_sigmas_p: Vec<Vec<Vec<u64>>>,
+    fri_query_init_wires_v: Vec<Vec<u64>>,
+    fri_query_init_wires_p: Vec<Vec<Vec<u64>>>,
+    fri_query_init_zs_partial_v: Vec<Vec<u64>>,
+    fri_query_init_zs_partial_p: Vec<Vec<Vec<u64>>>,
+    fri_query_init_quotient_v: Vec<Vec<u64>>,
+    fri_query_init_quotient_p: Vec<Vec<Vec<u64>>>,
+    fri_query_step0_v: Vec<Vec<Vec<u64>>>,
+    fri_query_step0_p: Vec<Vec<Vec<u64>>>,
+    fri_query_step1_v: Vec<Vec<Vec<u64>>>,
+    fri_query_step1_p: Vec<Vec<Vec<u64>>>,
+    fri_final_poly_ext_v: Vec<Vec<u64>>,
+    fri_pow_witness: u64,
+
+    public_inputs: Vec<u64>,
+}
+
 // TODO: The input should be CommonCircuitData
 pub fn generate_verifier_config<
     F: RichField + Extendable<D>,
@@ -207,10 +240,13 @@ pub fn generate_proof_base64<
     pwpi: &ProofWithPublicInputs<F, C, D>,
     conf: &VerifierConfig,
 ) -> anyhow::Result<String> {
+
     // total size: 75
     let mut proof_size: usize =
         (conf.num_wires_cap + conf.num_plonk_zs_partial_products_cap + conf.num_quotient_polys_cap)
             * conf.hash_size;
+
+    let mut wires_cap = vec![vec![0u64; 4]; conf.num_wires_cap];
 
     // total size: 3355
     proof_size += (conf.num_openings_constants
@@ -254,10 +290,39 @@ pub fn generate_proof_base64<
 
     proof_size += conf.num_public_inputs * conf.field_size;
 
+    let circom_proof = ProofForCircom {
+        wires_cap,
+        plonk_zs_partial_products_cap: vec![],
+        quotient_polys_cap: vec![],
+        openings_constants: vec![],
+        openings_plonk_sigmas: vec![],
+        openings_wires: vec![],
+        openings_plonk_zs: vec![],
+        openings_plonk_zs_next: vec![],
+        openings_partial_products: vec![],
+        openings_quotient_polys: vec![],
+        fri_commit_phase_merkle_caps: vec![],
+        fri_query_init_constants_sigmas_v: vec![],
+        fri_query_init_constants_sigmas_p: vec![],
+        fri_query_init_wires_v: vec![],
+        fri_query_init_wires_p: vec![],
+        fri_query_init_zs_partial_v: vec![],
+        fri_query_init_zs_partial_p: vec![],
+        fri_query_init_quotient_v: vec![],
+        fri_query_init_quotient_p: vec![],
+        fri_query_step0_v: vec![],
+        fri_query_step0_p: vec![],
+        fri_query_step1_v: vec![],
+        fri_query_step1_p: vec![],
+        fri_final_poly_ext_v: vec![],
+        fri_pow_witness: 0,
+        public_inputs: vec![]
+    };
+
     let proof_bytes = pwpi.to_bytes()?;
     assert_eq!(proof_bytes.len(), proof_size);
 
-    Ok(base64::encode(proof_bytes))
+    Ok(serde_json::to_string(&circom_proof).unwrap())
 }
 
 pub fn generate_circom_verifier<
@@ -823,8 +888,7 @@ mod tests {
         // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
         // sol_file.write_all(proof_lib.as_bytes())?;
 
-        let proof_base64 = generate_proof_base64(&proof, &conf)?;
-        let proof_json = "[ \"".to_owned() + &proof_base64 + &"\" ]";
+        let proof_json = generate_proof_base64(&proof, &conf)?;
 
         if !Path::new("./circom/test/data").is_dir() {
             std::fs::create_dir("./circom/test/data")?;
@@ -880,8 +944,7 @@ mod tests {
         // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
         // sol_file.write_all(proof_lib.as_bytes())?;
 
-        let proof_base64 = generate_proof_base64(&proof, &conf)?;
-        let proof_json = "[ \"".to_owned() + &proof_base64 + &"\" ]";
+        let proof_json = generate_proof_base64(&proof, &conf)?;
 
         if !Path::new("./circom/test/data").is_dir() {
             std::fs::create_dir("./circom/test/data")?;
@@ -944,8 +1007,7 @@ mod tests {
         // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
         // sol_file.write_all(proof_lib.as_bytes())?;
 
-        let proof_base64 = generate_proof_base64(&proof, &conf)?;
-        let proof_json = "[ \"".to_owned() + &proof_base64 + &"\" ]";
+        let proof_json = generate_proof_base64(&proof, &conf)?;
 
         if !Path::new("./circom/test/data").is_dir() {
             std::fs::create_dir("./circom/test/data")?;
