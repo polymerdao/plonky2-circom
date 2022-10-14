@@ -29,3 +29,10 @@ function NUM_FRI_QUERY_STEP0_P() { return $NUM_FRI_QUERY_STEP0_P; }
 function NUM_FRI_QUERY_STEP1_V() { return $NUM_FRI_QUERY_STEP1_V; }
 function NUM_FRI_QUERY_STEP1_P() { return $NUM_FRI_QUERY_STEP1_P; }
 function NUM_FRI_FINAL_POLY_EXT_V() { return $NUM_FRI_FINAL_POLY_EXT_V; }
+
+function NUM_SIGMA_CAPS() { return $SIGMA_CAP_COUNT; }
+function GET_SIGMA_CAP(i) {
+  var sc[$SIGMA_CAP_COUNT][4];
+  $SET_SIGMA_CAP;
+  return sc[i];
+}

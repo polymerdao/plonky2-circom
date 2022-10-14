@@ -905,15 +905,35 @@ pub fn generate_circom_verifier<
         .expect("Something went wrong reading the file");
 
     let sigma_cap_count = 1 << common.config.fri_config.cap_height;
-    proof_lib = proof_lib.replace("$SIGMA_CAP_COUNT", &*sigma_cap_count.to_string());
+    constants = constants.replace("$SIGMA_CAP_COUNT", &*sigma_cap_count.to_string());
 
     let mut sigma_cap_str = "".to_owned();
     for i in 0..sigma_cap_count {
         let cap = verifier_only.constants_sigmas_cap.0[i];
-        let hash = encode_hex(&cap.to_bytes());
-        sigma_cap_str += &*("        sc[".to_owned() + &*i.to_string() + "] = 0x" + &*hash + ";\n");
+        let hash = cap.to_vec();
+        assert_eq!(hash.len(), 4);
+        sigma_cap_str += &*("  sc[".to_owned()
+            + &*i.to_string()
+            + "][0] = "
+            + &*hash[0].to_canonical_u64().to_string()
+            + ";\n");
+        sigma_cap_str += &*("  sc[".to_owned()
+            + &*i.to_string()
+            + "][1] = "
+            + &*hash[1].to_canonical_u64().to_string()
+            + ";\n");
+        sigma_cap_str += &*("  sc[".to_owned()
+            + &*i.to_string()
+            + "][2] = "
+            + &*hash[2].to_canonical_u64().to_string()
+            + ";\n");
+        sigma_cap_str += &*("  sc[".to_owned()
+            + &*i.to_string()
+            + "][3] = "
+            + &*hash[3].to_canonical_u64().to_string()
+            + ";\n");
     }
-    proof_lib = proof_lib.replace("        $SET_SIGMA_CAP;\n", &*sigma_cap_str);
+    constants = constants.replace("  $SET_SIGMA_CAP;\n", &*sigma_cap_str);
 
     proof_lib = proof_lib.replace(
         "$PLONK_ZS_PARTIAL_PRODUCTS_CAP_PTR",
