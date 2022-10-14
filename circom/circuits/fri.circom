@@ -2,13 +2,13 @@ pragma circom 2.0.9;
 include "./constants.circom";
 
 template VerifyFriProof() {
-  signal input openings_constants[NUM_OPENINGS_CONSTANTS()];
-  signal input openings_plonk_sigmas[NUM_OPENINGS_PLONK_SIGMAS()];
-  signal input openings_wires[NUM_OPENINGS_WIRES()];
-  signal input openings_plonk_zs[NUM_OPENINGS_PLONK_ZS()];
-  signal input openings_plonk_zs_next[NUM_OPENINGS_PLONK_ZS_NEXT()];
-  signal input openings_partial_products[NUM_OPENINGS_PARTIAL_PRODUCTS()];
-  signal input openings_quotient_polys[NUM_OPENINGS_QUOTIENT_POLYS()];
+  signal input openings_constants[NUM_OPENINGS_CONSTANTS()][2];
+  signal input openings_plonk_sigmas[NUM_OPENINGS_PLONK_SIGMAS()][2];
+  signal input openings_wires[NUM_OPENINGS_WIRES()][2];
+  signal input openings_plonk_zs[NUM_OPENINGS_PLONK_ZS()][2];
+  signal input openings_plonk_zs_next[NUM_OPENINGS_PLONK_ZS_NEXT()][2];
+  signal input openings_partial_products[NUM_OPENINGS_PARTIAL_PRODUCTS()][2];
+  signal input openings_quotient_polys[NUM_OPENINGS_QUOTIENT_POLYS()][2];
 
   signal input fri_commit_phase_merkle_caps[NUM_FRI_COMMIT_ROUND()][FRI_COMMIT_MERKLE_CAP_HEIGHT()][4];
   signal input fri_query_init_constants_sigmas_v[NUM_FRI_QUERY_ROUND()][NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V()];
@@ -31,7 +31,6 @@ template VerifyFriProof() {
   signal input fri_pow_response;
   signal input fri_query_indices[NUM_FRI_QUERY_ROUND()];
 
-  signal output res;
-
-  res <== 1;
+  signal output out;
+  out <== 1;
 }
