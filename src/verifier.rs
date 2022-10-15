@@ -140,38 +140,38 @@ pub struct VerifierConfig {
 
 #[derive(Serialize)]
 pub struct ProofForCircom {
-    wires_cap: Vec<Vec<u64>>,
-    plonk_zs_partial_products_cap: Vec<Vec<u64>>,
-    quotient_polys_cap: Vec<Vec<u64>>,
+    wires_cap: Vec<Vec<String>>,
+    plonk_zs_partial_products_cap: Vec<Vec<String>>,
+    quotient_polys_cap: Vec<Vec<String>>,
 
-    openings_constants: Vec<Vec<u64>>,
-    openings_plonk_sigmas: Vec<Vec<u64>>,
-    openings_wires: Vec<Vec<u64>>,
-    openings_plonk_zs: Vec<Vec<u64>>,
-    openings_plonk_zs_next: Vec<Vec<u64>>,
-    openings_partial_products: Vec<Vec<u64>>,
-    openings_quotient_polys: Vec<Vec<u64>>,
+    openings_constants: Vec<Vec<String>>,
+    openings_plonk_sigmas: Vec<Vec<String>>,
+    openings_wires: Vec<Vec<String>>,
+    openings_plonk_zs: Vec<Vec<String>>,
+    openings_plonk_zs_next: Vec<Vec<String>>,
+    openings_partial_products: Vec<Vec<String>>,
+    openings_quotient_polys: Vec<Vec<String>>,
 
-    fri_commit_phase_merkle_caps: Vec<Vec<Vec<u64>>>,
+    fri_commit_phase_merkle_caps: Vec<Vec<Vec<String>>>,
 
-    fri_query_init_constants_sigmas_v: Vec<Vec<u64>>,
-    fri_query_init_constants_sigmas_p: Vec<Vec<Vec<u64>>>,
-    fri_query_init_wires_v: Vec<Vec<u64>>,
-    fri_query_init_wires_p: Vec<Vec<Vec<u64>>>,
-    fri_query_init_zs_partial_v: Vec<Vec<u64>>,
-    fri_query_init_zs_partial_p: Vec<Vec<Vec<u64>>>,
-    fri_query_init_quotient_v: Vec<Vec<u64>>,
-    fri_query_init_quotient_p: Vec<Vec<Vec<u64>>>,
+    fri_query_init_constants_sigmas_v: Vec<Vec<String>>,
+    fri_query_init_constants_sigmas_p: Vec<Vec<Vec<String>>>,
+    fri_query_init_wires_v: Vec<Vec<String>>,
+    fri_query_init_wires_p: Vec<Vec<Vec<String>>>,
+    fri_query_init_zs_partial_v: Vec<Vec<String>>,
+    fri_query_init_zs_partial_p: Vec<Vec<Vec<String>>>,
+    fri_query_init_quotient_v: Vec<Vec<String>>,
+    fri_query_init_quotient_p: Vec<Vec<Vec<String>>>,
 
-    fri_query_step0_v: Vec<Vec<Vec<u64>>>,
-    fri_query_step0_p: Vec<Vec<Vec<u64>>>,
-    fri_query_step1_v: Vec<Vec<Vec<u64>>>,
-    fri_query_step1_p: Vec<Vec<Vec<u64>>>,
+    fri_query_step0_v: Vec<Vec<Vec<String>>>,
+    fri_query_step0_p: Vec<Vec<Vec<String>>>,
+    fri_query_step1_v: Vec<Vec<Vec<String>>>,
+    fri_query_step1_p: Vec<Vec<Vec<String>>>,
 
-    fri_final_poly_ext_v: Vec<Vec<u64>>,
-    fri_pow_witness: u64,
+    fri_final_poly_ext_v: Vec<Vec<String>>,
+    fri_pow_witness: String,
 
-    public_inputs: Vec<u64>,
+    public_inputs: Vec<String>,
 }
 
 // TODO: The input should be CommonCircuitData
@@ -248,31 +248,31 @@ pub fn generate_proof_base64<
         (conf.num_wires_cap + conf.num_plonk_zs_partial_products_cap + conf.num_quotient_polys_cap)
             * conf.hash_size;
 
-    let mut wires_cap = vec![vec![0u64; 4]; conf.num_wires_cap];
+    let mut wires_cap = vec![vec!["0".to_string(); 4]; conf.num_wires_cap];
     for i in 0..conf.num_wires_cap {
         let h = pwpi.proof.wires_cap.flatten();
         assert_eq!(h.len(), 4);
         for j in 0..h.len() {
-            wires_cap[i][j] = h[j].to_canonical_u64();
+            wires_cap[i][j] = h[j].to_canonical_u64().to_string();
         }
     }
 
     let mut plonk_zs_partial_products_cap =
-        vec![vec![0u64; 4]; conf.num_plonk_zs_partial_products_cap];
+        vec![vec!["0".to_string(); 4]; conf.num_plonk_zs_partial_products_cap];
     for i in 0..conf.num_plonk_zs_partial_products_cap {
         let h = pwpi.proof.plonk_zs_partial_products_cap.flatten();
         assert_eq!(h.len(), 4);
         for j in 0..h.len() {
-            plonk_zs_partial_products_cap[i][j] = h[j].to_canonical_u64();
+            plonk_zs_partial_products_cap[i][j] = h[j].to_canonical_u64().to_string();
         }
     }
 
-    let mut quotient_polys_cap = vec![vec![0u64; 4]; conf.num_quotient_polys_cap];
+    let mut quotient_polys_cap = vec![vec!["0".to_string(); 4]; conf.num_quotient_polys_cap];
     for i in 0..conf.num_quotient_polys_cap {
         let h = pwpi.proof.quotient_polys_cap.flatten();
         assert_eq!(h.len(), 4);
         for j in 0..h.len() {
-            quotient_polys_cap[i][j] = h[j].to_canonical_u64();
+            quotient_polys_cap[i][j] = h[j].to_canonical_u64().to_string();
         }
     }
 
@@ -286,67 +286,91 @@ pub fn generate_proof_base64<
         + conf.num_openings_quotient_polys)
         * conf.ext_field_size;
 
-    let mut openings_constants = vec![vec![0u64; 2]; conf.num_openings_constants];
+    let mut openings_constants = vec![vec!["0".to_string(); 2]; conf.num_openings_constants];
     for i in 0..conf.num_openings_constants {
-        openings_constants[i][0] =
-            pwpi.proof.openings.constants[i].to_basefield_array()[0].to_canonical_u64();
-        openings_constants[i][1] =
-            pwpi.proof.openings.constants[i].to_basefield_array()[1].to_canonical_u64();
+        openings_constants[i][0] = pwpi.proof.openings.constants[i].to_basefield_array()[0]
+            .to_canonical_u64()
+            .to_string();
+        openings_constants[i][1] = pwpi.proof.openings.constants[i].to_basefield_array()[1]
+            .to_canonical_u64()
+            .to_string();
     }
-    let mut openings_plonk_sigmas = vec![vec![0u64; 2]; conf.num_openings_plonk_sigmas];
+    let mut openings_plonk_sigmas = vec![vec!["0".to_string(); 2]; conf.num_openings_plonk_sigmas];
     for i in 0..conf.num_openings_plonk_sigmas {
-        openings_plonk_sigmas[i][0] =
-            pwpi.proof.openings.plonk_sigmas[i].to_basefield_array()[0].to_canonical_u64();
-        openings_plonk_sigmas[i][1] =
-            pwpi.proof.openings.plonk_sigmas[i].to_basefield_array()[1].to_canonical_u64();
+        openings_plonk_sigmas[i][0] = pwpi.proof.openings.plonk_sigmas[i].to_basefield_array()[0]
+            .to_canonical_u64()
+            .to_string();
+        openings_plonk_sigmas[i][1] = pwpi.proof.openings.plonk_sigmas[i].to_basefield_array()[1]
+            .to_canonical_u64()
+            .to_string();
     }
-    let mut openings_wires = vec![vec![0u64; 2]; conf.num_openings_wires];
+    let mut openings_wires = vec![vec!["0".to_string(); 2]; conf.num_openings_wires];
     for i in 0..conf.num_openings_wires {
-        openings_wires[i][0] =
-            pwpi.proof.openings.wires[i].to_basefield_array()[0].to_canonical_u64();
-        openings_wires[i][1] =
-            pwpi.proof.openings.wires[i].to_basefield_array()[1].to_canonical_u64();
+        openings_wires[i][0] = pwpi.proof.openings.wires[i].to_basefield_array()[0]
+            .to_canonical_u64()
+            .to_string();
+        openings_wires[i][1] = pwpi.proof.openings.wires[i].to_basefield_array()[1]
+            .to_canonical_u64()
+            .to_string();
     }
-    let mut openings_plonk_zs = vec![vec![0u64; 2]; conf.num_openings_plonk_zs];
+    let mut openings_plonk_zs = vec![vec!["0".to_string(); 2]; conf.num_openings_plonk_zs];
     for i in 0..conf.num_openings_plonk_zs {
-        openings_plonk_zs[i][0] =
-            pwpi.proof.openings.plonk_zs[i].to_basefield_array()[0].to_canonical_u64();
-        openings_plonk_zs[i][1] =
-            pwpi.proof.openings.plonk_zs[i].to_basefield_array()[1].to_canonical_u64();
+        openings_plonk_zs[i][0] = pwpi.proof.openings.plonk_zs[i].to_basefield_array()[0]
+            .to_canonical_u64()
+            .to_string();
+        openings_plonk_zs[i][1] = pwpi.proof.openings.plonk_zs[i].to_basefield_array()[1]
+            .to_canonical_u64()
+            .to_string();
     }
-    let mut openings_plonk_zs_next = vec![vec![0u64; 2]; conf.num_openings_plonk_zs_next];
+    let mut openings_plonk_zs_next =
+        vec![vec!["0".to_string(); 2]; conf.num_openings_plonk_zs_next];
     for i in 0..conf.num_openings_plonk_zs_next {
-        openings_plonk_zs_next[i][0] =
-            pwpi.proof.openings.plonk_zs_next[i].to_basefield_array()[0].to_canonical_u64();
-        openings_plonk_zs_next[i][1] =
-            pwpi.proof.openings.plonk_zs_next[i].to_basefield_array()[1].to_canonical_u64();
+        openings_plonk_zs_next[i][0] = pwpi.proof.openings.plonk_zs_next[i].to_basefield_array()[0]
+            .to_canonical_u64()
+            .to_string();
+        openings_plonk_zs_next[i][1] = pwpi.proof.openings.plonk_zs_next[i].to_basefield_array()[1]
+            .to_canonical_u64()
+            .to_string();
     }
-    let mut openings_partial_products = vec![vec![0u64; 2]; conf.num_openings_partial_products];
+    let mut openings_partial_products =
+        vec![vec!["0".to_string(); 2]; conf.num_openings_partial_products];
     for i in 0..conf.num_openings_partial_products {
-        openings_partial_products[i][0] =
-            pwpi.proof.openings.partial_products[i].to_basefield_array()[0].to_canonical_u64();
-        openings_partial_products[i][1] =
-            pwpi.proof.openings.partial_products[i].to_basefield_array()[1].to_canonical_u64();
+        openings_partial_products[i][0] = pwpi.proof.openings.partial_products[i]
+            .to_basefield_array()[0]
+            .to_canonical_u64()
+            .to_string();
+        openings_partial_products[i][1] = pwpi.proof.openings.partial_products[i]
+            .to_basefield_array()[1]
+            .to_canonical_u64()
+            .to_string();
     }
-    let mut openings_quotient_polys = vec![vec![0u64; 2]; conf.num_openings_quotient_polys];
+    let mut openings_quotient_polys =
+        vec![vec!["0".to_string(); 2]; conf.num_openings_quotient_polys];
     for i in 0..conf.num_openings_quotient_polys {
-        openings_quotient_polys[i][0] =
-            pwpi.proof.openings.quotient_polys[i].to_basefield_array()[0].to_canonical_u64();
-        openings_quotient_polys[i][1] =
-            pwpi.proof.openings.quotient_polys[i].to_basefield_array()[1].to_canonical_u64();
+        openings_quotient_polys[i][0] = pwpi.proof.openings.quotient_polys[i].to_basefield_array()
+            [0]
+        .to_canonical_u64()
+        .to_string();
+        openings_quotient_polys[i][1] = pwpi.proof.openings.quotient_polys[i].to_basefield_array()
+            [1]
+        .to_canonical_u64()
+        .to_string();
     }
 
     // 3405
     proof_size += (conf.num_fri_commit_round * conf.fri_commit_merkle_cap_height) * conf.hash_size;
 
     let mut fri_commit_phase_merkle_caps =
-        vec![vec![vec![0u64; 4]; conf.fri_commit_merkle_cap_height]; conf.num_fri_commit_round];
+        vec![
+            vec![vec!["0".to_string(); 4]; conf.fri_commit_merkle_cap_height];
+            conf.num_fri_commit_round
+        ];
     for i in 0..conf.num_fri_commit_round {
         let h = pwpi.proof.opening_proof.commit_phase_merkle_caps[i].flatten();
         assert_eq!(h.len(), 4 * conf.fri_commit_merkle_cap_height);
         for j in 0..conf.fri_commit_merkle_cap_height {
             for k in 0..4 {
-                fri_commit_phase_merkle_caps[i][j][k] = h[j * 4 + k].to_canonical_u64();
+                fri_commit_phase_merkle_caps[i][j][k] = h[j * 4 + k].to_canonical_u64().to_string();
             }
         }
     }
@@ -375,34 +399,46 @@ pub fn generate_proof_base64<
             + conf.merkle_height_size);
 
     let mut fri_query_init_constants_sigmas_v =
-        vec![vec![0u64; conf.num_fri_query_init_constants_sigmas_v]; conf.num_fri_query_round];
+        vec![
+            vec!["0".to_string(); conf.num_fri_query_init_constants_sigmas_v];
+            conf.num_fri_query_round
+        ];
     let mut fri_query_init_wires_v =
-        vec![vec![0u64; conf.num_fri_query_init_wires_v]; conf.num_fri_query_round];
+        vec![vec!["0".to_string(); conf.num_fri_query_init_wires_v]; conf.num_fri_query_round];
     let mut fri_query_init_zs_partial_v =
-        vec![vec![0u64; conf.num_fri_query_init_zs_partial_v]; conf.num_fri_query_round];
+        vec![vec!["0".to_string(); conf.num_fri_query_init_zs_partial_v]; conf.num_fri_query_round];
     let mut fri_query_init_quotient_v =
-        vec![vec![0u64; conf.num_fri_query_init_quotient_v]; conf.num_fri_query_round];
+        vec![vec!["0".to_string(); conf.num_fri_query_init_quotient_v]; conf.num_fri_query_round];
 
     let mut fri_query_init_constants_sigmas_p =
         vec![
-            vec![vec![0u64; 4]; conf.num_fri_query_init_constants_sigmas_p];
+            vec![vec!["0".to_string(); 4]; conf.num_fri_query_init_constants_sigmas_p];
             conf.num_fri_query_round
         ];
     let mut fri_query_init_wires_p =
-        vec![vec![vec![0u64; 4]; conf.num_fri_query_init_wires_p]; conf.num_fri_query_round];
+        vec![
+            vec![vec!["0".to_string(); 4]; conf.num_fri_query_init_wires_p];
+            conf.num_fri_query_round
+        ];
     let mut fri_query_init_zs_partial_p =
-        vec![vec![vec![0u64; 4]; conf.num_fri_query_init_zs_partial_p]; conf.num_fri_query_round];
+        vec![
+            vec![vec!["0".to_string(); 4]; conf.num_fri_query_init_zs_partial_p];
+            conf.num_fri_query_round
+        ];
     let mut fri_query_init_quotient_p =
-        vec![vec![vec![0u64; 4]; conf.num_fri_query_init_quotient_p]; conf.num_fri_query_round];
+        vec![
+            vec![vec!["0".to_string(); 4]; conf.num_fri_query_init_quotient_p];
+            conf.num_fri_query_round
+        ];
 
     let mut fri_query_step0_v =
-        vec![vec![vec![0u64; 2]; conf.num_fri_query_step0_v]; conf.num_fri_query_round];
+        vec![vec![vec!["0".to_string(); 2]; conf.num_fri_query_step0_v]; conf.num_fri_query_round];
     let mut fri_query_step1_v =
-        vec![vec![vec![0u64; 2]; conf.num_fri_query_step1_v]; conf.num_fri_query_round];
+        vec![vec![vec!["0".to_string(); 2]; conf.num_fri_query_step1_v]; conf.num_fri_query_round];
     let mut fri_query_step0_p =
-        vec![vec![vec![0u64; 4]; conf.num_fri_query_step0_p]; conf.num_fri_query_round];
+        vec![vec![vec!["0".to_string(); 4]; conf.num_fri_query_step0_p]; conf.num_fri_query_round];
     let mut fri_query_step1_p =
-        vec![vec![vec![0u64; 4]; conf.num_fri_query_step1_p]; conf.num_fri_query_round];
+        vec![vec![vec!["0".to_string(); 4]; conf.num_fri_query_step1_p]; conf.num_fri_query_round];
 
     for i in 0..conf.num_fri_query_round {
         assert_eq!(
@@ -418,28 +454,32 @@ pub fn generate_proof_base64<
                 .initial_trees_proof
                 .evals_proofs[0]
                 .0[j]
-                .to_canonical_u64();
+                .to_canonical_u64()
+                .to_string();
         }
         for j in 0..conf.num_fri_query_init_wires_v {
             fri_query_init_wires_v[i][j] = pwpi.proof.opening_proof.query_round_proofs[i]
                 .initial_trees_proof
                 .evals_proofs[1]
                 .0[j]
-                .to_canonical_u64();
+                .to_canonical_u64()
+                .to_string();
         }
         for j in 0..conf.num_fri_query_init_zs_partial_v {
             fri_query_init_zs_partial_v[i][j] = pwpi.proof.opening_proof.query_round_proofs[i]
                 .initial_trees_proof
                 .evals_proofs[2]
                 .0[j]
-                .to_canonical_u64();
+                .to_canonical_u64()
+                .to_string();
         }
         for j in 0..conf.num_fri_query_init_quotient_v {
             fri_query_init_quotient_v[i][j] = pwpi.proof.opening_proof.query_round_proofs[i]
                 .initial_trees_proof
                 .evals_proofs[3]
                 .0[j]
-                .to_canonical_u64();
+                .to_canonical_u64()
+                .to_string();
         }
         for j in 0..conf.num_fri_query_init_constants_sigmas_p {
             let h = pwpi.proof.opening_proof.query_round_proofs[i]
@@ -450,7 +490,7 @@ pub fn generate_proof_base64<
                 .to_vec();
             assert_eq!(h.len(), 4);
             for k in 0..4 {
-                fri_query_init_constants_sigmas_p[i][j][k] = h[k].to_canonical_u64();
+                fri_query_init_constants_sigmas_p[i][j][k] = h[k].to_canonical_u64().to_string();
             }
         }
         for j in 0..conf.num_fri_query_init_wires_p {
@@ -462,7 +502,7 @@ pub fn generate_proof_base64<
                 .to_vec();
             assert_eq!(h.len(), 4);
             for k in 0..4 {
-                fri_query_init_wires_p[i][j][k] = h[k].to_canonical_u64();
+                fri_query_init_wires_p[i][j][k] = h[k].to_canonical_u64().to_string();
             }
         }
         for j in 0..conf.num_fri_query_init_zs_partial_p {
@@ -474,7 +514,7 @@ pub fn generate_proof_base64<
                 .to_vec();
             assert_eq!(h.len(), 4);
             for k in 0..4 {
-                fri_query_init_zs_partial_p[i][j][k] = h[k].to_canonical_u64();
+                fri_query_init_zs_partial_p[i][j][k] = h[k].to_canonical_u64().to_string();
             }
         }
         for j in 0..conf.num_fri_query_init_quotient_p {
@@ -486,28 +526,32 @@ pub fn generate_proof_base64<
                 .to_vec();
             assert_eq!(h.len(), 4);
             for k in 0..4 {
-                fri_query_init_quotient_p[i][j][k] = h[k].to_canonical_u64();
+                fri_query_init_quotient_p[i][j][k] = h[k].to_canonical_u64().to_string();
             }
         }
         for j in 0..conf.num_fri_query_step0_v {
             fri_query_step0_v[i][j][0] = pwpi.proof.opening_proof.query_round_proofs[i].steps[0]
                 .evals[j]
                 .to_basefield_array()[0]
-                .to_canonical_u64();
+                .to_canonical_u64()
+                .to_string();
             fri_query_step0_v[i][j][1] = pwpi.proof.opening_proof.query_round_proofs[i].steps[0]
                 .evals[j]
                 .to_basefield_array()[1]
-                .to_canonical_u64();
+                .to_canonical_u64()
+                .to_string();
         }
         for j in 0..conf.num_fri_query_step1_v {
             fri_query_step1_v[i][j][0] = pwpi.proof.opening_proof.query_round_proofs[i].steps[1]
                 .evals[j]
                 .to_basefield_array()[0]
-                .to_canonical_u64();
+                .to_canonical_u64()
+                .to_string();
             fri_query_step1_v[i][j][1] = pwpi.proof.opening_proof.query_round_proofs[i].steps[1]
                 .evals[j]
                 .to_basefield_array()[1]
-                .to_canonical_u64();
+                .to_canonical_u64()
+                .to_string();
         }
         assert_eq!(
             pwpi.proof.opening_proof.query_round_proofs[i].steps.len(),
@@ -520,7 +564,7 @@ pub fn generate_proof_base64<
                 .to_vec();
             assert_eq!(h.len(), 4);
             for k in 0..4 {
-                fri_query_step0_p[i][j][k] = h[k].to_canonical_u64();
+                fri_query_step0_p[i][j][k] = h[k].to_canonical_u64().to_string();
             }
         }
         for j in 0..conf.num_fri_query_step1_p {
@@ -530,7 +574,7 @@ pub fn generate_proof_base64<
                 .to_vec();
             assert_eq!(h.len(), 4);
             for k in 0..4 {
-                fri_query_step1_p[i][j][k] = h[k].to_canonical_u64();
+                fri_query_step1_p[i][j][k] = h[k].to_canonical_u64().to_string();
             }
         }
     }
@@ -538,14 +582,16 @@ pub fn generate_proof_base64<
     // 51039
     proof_size += conf.num_fri_final_poly_ext_v * conf.ext_field_size;
 
-    let mut fri_final_poly_ext_v = vec![vec![0u64; 2]; conf.num_fri_final_poly_ext_v];
+    let mut fri_final_poly_ext_v = vec![vec!["0".to_string(); 2]; conf.num_fri_final_poly_ext_v];
     for i in 0..conf.num_fri_final_poly_ext_v {
         fri_final_poly_ext_v[i][0] = pwpi.proof.opening_proof.final_poly.coeffs[i]
             .to_basefield_array()[0]
-            .to_canonical_u64();
+            .to_canonical_u64()
+            .to_string();
         fri_final_poly_ext_v[i][1] = pwpi.proof.opening_proof.final_poly.coeffs[i]
             .to_basefield_array()[1]
-            .to_canonical_u64();
+            .to_canonical_u64()
+            .to_string();
     }
 
     // 51047
@@ -553,9 +599,9 @@ pub fn generate_proof_base64<
 
     proof_size += conf.num_public_inputs * conf.field_size;
 
-    let mut public_inputs = vec![0u64; conf.num_public_inputs];
+    let mut public_inputs = vec!["0".to_string(); conf.num_public_inputs];
     for i in 0..conf.num_public_inputs {
-        public_inputs[i] = pwpi.public_inputs[i].to_canonical_u64();
+        public_inputs[i] = pwpi.public_inputs[i].to_canonical_u64().to_string();
     }
 
     let circom_proof = ProofForCircom {
@@ -583,7 +629,12 @@ pub fn generate_proof_base64<
         fri_query_step1_v,
         fri_query_step1_p,
         fri_final_poly_ext_v,
-        fri_pow_witness: pwpi.proof.opening_proof.pow_witness.to_canonical_u64(),
+        fri_pow_witness: pwpi
+            .proof
+            .opening_proof
+            .pow_witness
+            .to_canonical_u64()
+            .to_string(),
         public_inputs,
     };
 
