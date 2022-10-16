@@ -228,7 +228,11 @@ template HashNoPad(nInputs) {
         for (var j = 0; j < 8; j++) {
             var index = i * 8 + j;
             if (index >= nInputs) {
-                cPoseidon[i].in[j] <== 0;
+                if (i > 0) {
+                  cPoseidon[i].in[j] <== cPoseidon[i-1].out[j];
+                } else {
+                  cPoseidon[i].in[j] <== 0;
+                }
             } else {
                 cPoseidon[i].in[j] <== in[index];
             }
@@ -239,6 +243,16 @@ template HashNoPad(nInputs) {
             cPoseidon[i].capacity[2] <== cPoseidon[i-1].out[10];
             cPoseidon[i].capacity[3] <== cPoseidon[i-1].out[11];
         }
+
+//        for (var j=0; j<8; j++) {
+//          log(0, cPoseidon[i].in[j]);
+//        }
+//        for (var j=0; j<4; j++) {
+//          log(0, cPoseidon[i].capacity[j]);
+//        }
+//        for (var j=0; j<12; j++) {
+//          log(0, cPoseidon[i].out[j]);
+//        }
     }
 
     out[0] <== cPoseidon[nHash - 1].out[0];

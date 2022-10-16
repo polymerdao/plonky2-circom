@@ -15,6 +15,10 @@ describe("Verify Fri Proof Circuit Test", function () {
 
     it("Should pass", async () => {
         const input = {
+            wires_cap: proof.wires_cap,
+            plonk_zs_partial_products_cap: proof.plonk_zs_partial_products_cap,
+            quotient_polys_cap: proof.quotient_polys_cap,
+
             openings_constants: proof.openings_constants,
             openings_plonk_sigmas: proof.openings_plonk_sigmas,
             openings_wires: proof.openings_wires,

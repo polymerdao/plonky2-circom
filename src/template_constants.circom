@@ -5,6 +5,10 @@ function Order() { return 18446744069414584321; }
 function W() { return 7; }
 function DTH_ROOT() { return 18446744069414584320; }
 
+function NUM_WIRES_CAP() { return $NUM_WIRES_CAP; }
+function NUM_PLONK_ZS_PARTIAL_PRODUCTS_CAP() { return $NUM_PLONK_ZS_PARTIAL_PRODUCTS_CAP; }
+function NUM_QUOTIENT_POLYS_CAP() { return $NUM_QUOTIENT_POLYS_CAP; }
+
 function NUM_OPENINGS_CONSTANTS() { return $NUM_OPENINGS_CONSTANTS; }
 function NUM_OPENINGS_PLONK_SIGMAS() { return $NUM_OPENINGS_PLONK_SIGMAS; }
 function NUM_OPENINGS_WIRES() { return $NUM_OPENINGS_WIRES; }
