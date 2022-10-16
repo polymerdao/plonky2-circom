@@ -136,8 +136,10 @@ template VerifyFriProof() {
   component sigma_caps[NUM_FRI_QUERY_ROUND()];
   component merkle_caps[NUM_FRI_QUERY_ROUND()][4];
   component c_wires_cap[NUM_FRI_QUERY_ROUND()];
+  component c_plonk_zs_partial_products_cap[NUM_FRI_QUERY_ROUND()];
+  component c_quotient_polys_cap[NUM_FRI_QUERY_ROUND()];
 
-  //for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
+  // for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
   for (var round = 0; round < 1; round++) {
     // constants_sigmas
     merkle_caps[round][0] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V(),
@@ -192,5 +194,57 @@ template VerifyFriProof() {
     merkle_caps[round][1].digest[1] === c_wires_cap[round].out[1];
     merkle_caps[round][1].digest[2] === c_wires_cap[round].out[2];
     merkle_caps[round][1].digest[3] === c_wires_cap[round].out[3];
+
+    // plonk_zs_partial_products_cap
+    merkle_caps[round][2] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_ZS_PARTIAL_V(),
+                                                NUM_FRI_QUERY_INIT_ZS_PARTIAL_P());
+    merkle_caps[round][2].leaf_index <== fri_query_indices[round];
+    for (var i = 0; i < NUM_FRI_QUERY_INIT_ZS_PARTIAL_V(); i++) {
+      merkle_caps[round][2].leaf[i] <== fri_query_init_zs_partial_v[round][i];
+    }
+    for (var i = 0; i < NUM_FRI_QUERY_INIT_ZS_PARTIAL_P(); i++) {
+      merkle_caps[round][2].proof[i][0] <== fri_query_init_zs_partial_p[round][i][0];
+      merkle_caps[round][2].proof[i][1] <== fri_query_init_zs_partial_p[round][i][1];
+      merkle_caps[round][2].proof[i][2] <== fri_query_init_zs_partial_p[round][i][2];
+      merkle_caps[round][2].proof[i][3] <== fri_query_init_zs_partial_p[round][i][3];
+    }
+    c_plonk_zs_partial_products_cap[round] = RandomAccess2(NUM_PLONK_ZS_PARTIAL_PRODUCTS_CAP(), 4);
+    for (var i = 0; i < NUM_PLONK_ZS_PARTIAL_PRODUCTS_CAP(); i++) {
+      c_plonk_zs_partial_products_cap[round].a[i][0] <== plonk_zs_partial_products_cap[i][0];
+      c_plonk_zs_partial_products_cap[round].a[i][1] <== plonk_zs_partial_products_cap[i][1];
+      c_plonk_zs_partial_products_cap[round].a[i][2] <== plonk_zs_partial_products_cap[i][2];
+      c_plonk_zs_partial_products_cap[round].a[i][3] <== plonk_zs_partial_products_cap[i][3];
+    }
+    c_plonk_zs_partial_products_cap[round].idx <== merkle_caps[round][2].index;
+    merkle_caps[round][2].digest[0] === c_plonk_zs_partial_products_cap[round].out[0];
+    merkle_caps[round][2].digest[1] === c_plonk_zs_partial_products_cap[round].out[1];
+    merkle_caps[round][2].digest[2] === c_plonk_zs_partial_products_cap[round].out[2];
+    merkle_caps[round][2].digest[3] === c_plonk_zs_partial_products_cap[round].out[3];
+
+    // plonk_zs_partial_products_cap
+    merkle_caps[round][3] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_QUOTIENT_V(),
+                                                NUM_FRI_QUERY_INIT_QUOTIENT_P());
+    merkle_caps[round][3].leaf_index <== fri_query_indices[round];
+    for (var i = 0; i < NUM_FRI_QUERY_INIT_QUOTIENT_V(); i++) {
+      merkle_caps[round][3].leaf[i] <== fri_query_init_quotient_v[round][i];
+    }
+    for (var i = 0; i < NUM_FRI_QUERY_INIT_QUOTIENT_P(); i++) {
+      merkle_caps[round][3].proof[i][0] <== fri_query_init_quotient_p[round][i][0];
+      merkle_caps[round][3].proof[i][1] <== fri_query_init_quotient_p[round][i][1];
+      merkle_caps[round][3].proof[i][2] <== fri_query_init_quotient_p[round][i][2];
+      merkle_caps[round][3].proof[i][3] <== fri_query_init_quotient_p[round][i][3];
+    }
+    c_quotient_polys_cap[round] = RandomAccess2(NUM_QUOTIENT_POLYS_CAP(), 4);
+    for (var i = 0; i < NUM_QUOTIENT_POLYS_CAP(); i++) {
+      c_quotient_polys_cap[round].a[i][0] <== quotient_polys_cap[i][0];
+      c_quotient_polys_cap[round].a[i][1] <== quotient_polys_cap[i][1];
+      c_quotient_polys_cap[round].a[i][2] <== quotient_polys_cap[i][2];
+      c_quotient_polys_cap[round].a[i][3] <== quotient_polys_cap[i][3];
+    }
+    c_quotient_polys_cap[round].idx <== merkle_caps[round][2].index;
+    merkle_caps[round][3].digest[0] === c_quotient_polys_cap[round].out[0];
+    merkle_caps[round][3].digest[1] === c_quotient_polys_cap[round].out[1];
+    merkle_caps[round][3].digest[2] === c_quotient_polys_cap[round].out[2];
+    merkle_caps[round][3].digest[3] === c_quotient_polys_cap[round].out[3];
   }
 }
