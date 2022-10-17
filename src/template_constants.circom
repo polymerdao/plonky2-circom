@@ -40,3 +40,10 @@ function GET_SIGMA_CAP(i) {
   $SET_SIGMA_CAP;
   return sc[i];
 }
+
+function NUM_REDUCTION_ARITY_BITS() { return $NUM_REDUCTION_ARITY_BITS; }
+function REDUCTION_ARITY_BITS() {
+  var bits[$NUM_REDUCTION_ARITY_BITS];
+  $SET_REDUCTION_ARITY_BITS;
+  return bits;
+}

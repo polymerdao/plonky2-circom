@@ -675,14 +675,14 @@ pub fn generate_circom_verifier<
     let reduction_arity_bits = &common.fri_params.reduction_arity_bits;
     let mut reduction_arity_bits_str = "".to_owned();
     for i in 0..reduction_arity_bits.len() {
-        reduction_arity_bits_str += &*("        bits[".to_owned()
+        reduction_arity_bits_str += &*("  bits[".to_owned()
             + &*i.to_string()
             + "] = "
             + &*reduction_arity_bits[i].to_string()
             + ";\n");
     }
     constants = constants.replace(
-        "        $SET_REDUCTION_ARITY_BITS;\n",
+        "  $SET_REDUCTION_ARITY_BITS;\n",
         &*reduction_arity_bits_str,
     );
     constants = constants.replace(
