@@ -2,19 +2,7 @@ pragma circom 2.0.9;
 include "./constants.circom";
 include "./poseidon.circom";
 include "./utils.circom";
-
-// bit = a & 1
-// out = a >> 1
-template RShift1() {
-  signal input a;
-  signal output out;
-  signal output bit;
-
-  var o = a >> 1;
-  out <-- o;
-  bit <== a - out * 2;
-  bit * (1 - bit) === 0;
-}
+include "./goldilocks.circom";
 
 template GetMerkleProofToCap(nLeaf, nProof) {
   signal input leaf[nLeaf];
@@ -130,17 +118,27 @@ template VerifyFriProof() {
   signal input fri_pow_response;
   signal input fri_query_indices[NUM_FRI_QUERY_ROUND()];
 
+  // TODO: remove out
   signal output out;
   out <== 1;
 
+  assert(NUM_REDUCTION_ARITY_BITS() == 2);
+  var arity_bits[NUM_REDUCTION_ARITY_BITS()] = REDUCTION_ARITY_BITS();
+  signal arity[NUM_REDUCTION_ARITY_BITS()];
+  for (var i = 0; i < NUM_REDUCTION_ARITY_BITS(); i++) {
+    arity[i] <== 1 << arity_bits[i];
+  }
+  component coset_index[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()];
+
   component sigma_caps[NUM_FRI_QUERY_ROUND()];
-  component merkle_caps[NUM_FRI_QUERY_ROUND()][4];
+  component merkle_caps[NUM_FRI_QUERY_ROUND()][6];
   component c_wires_cap[NUM_FRI_QUERY_ROUND()];
   component c_plonk_zs_partial_products_cap[NUM_FRI_QUERY_ROUND()];
   component c_quotient_polys_cap[NUM_FRI_QUERY_ROUND()];
+  component c_commit_merkle_cap[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()];
 
-  // for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
-  for (var round = 0; round < 1; round++) {
+  for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
+  // for (var round = 0; round < 2; round++) {
     // constants_sigmas
     merkle_caps[round][0] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V(),
                                                 NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_P());
@@ -195,7 +193,7 @@ template VerifyFriProof() {
     merkle_caps[round][1].digest[2] === c_wires_cap[round].out[2];
     merkle_caps[round][1].digest[3] === c_wires_cap[round].out[3];
 
-    // plonk_zs_partial_products_cap
+    // plonk_zs_partial_products
     merkle_caps[round][2] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_ZS_PARTIAL_V(),
                                                 NUM_FRI_QUERY_INIT_ZS_PARTIAL_P());
     merkle_caps[round][2].leaf_index <== fri_query_indices[round];
@@ -221,7 +219,7 @@ template VerifyFriProof() {
     merkle_caps[round][2].digest[2] === c_plonk_zs_partial_products_cap[round].out[2];
     merkle_caps[round][2].digest[3] === c_plonk_zs_partial_products_cap[round].out[3];
 
-    // plonk_zs_partial_products_cap
+    // quotient
     merkle_caps[round][3] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_QUOTIENT_V(),
                                                 NUM_FRI_QUERY_INIT_QUOTIENT_P());
     merkle_caps[round][3].leaf_index <== fri_query_indices[round];
@@ -241,10 +239,77 @@ template VerifyFriProof() {
       c_quotient_polys_cap[round].a[i][2] <== quotient_polys_cap[i][2];
       c_quotient_polys_cap[round].a[i][3] <== quotient_polys_cap[i][3];
     }
-    c_quotient_polys_cap[round].idx <== merkle_caps[round][2].index;
+    c_quotient_polys_cap[round].idx <== merkle_caps[round][3].index;
     merkle_caps[round][3].digest[0] === c_quotient_polys_cap[round].out[0];
     merkle_caps[round][3].digest[1] === c_quotient_polys_cap[round].out[1];
     merkle_caps[round][3].digest[2] === c_quotient_polys_cap[round].out[2];
     merkle_caps[round][3].digest[3] === c_quotient_polys_cap[round].out[3];
+
+    for (var i = 0; i < NUM_REDUCTION_ARITY_BITS(); i++) {
+      coset_index[round][i] = RShift(arity_bits[i]);
+      if (i == 0) {
+        coset_index[round][i].x <== fri_query_indices[round];
+      } else {
+        coset_index[round][i].x <== coset_index[round][i - 1].out;
+      }
+
+      // step 0
+      if (i == 0) {
+        merkle_caps[round][4] = GetMerkleProofToCap(NUM_FRI_QUERY_STEP0_V() * 2,
+                                                    NUM_FRI_QUERY_STEP0_P());
+        merkle_caps[round][4].leaf_index <== coset_index[round][i].out;
+        for (var j = 0; j < NUM_FRI_QUERY_STEP0_V(); j++) {
+          merkle_caps[round][4].leaf[j * 2] <== fri_query_step0_v[round][j][0];
+          merkle_caps[round][4].leaf[j * 2 + 1] <== fri_query_step0_v[round][j][1];
+        }
+        for (var j = 0; j < NUM_FRI_QUERY_STEP0_P(); j++) {
+          merkle_caps[round][4].proof[j][0] <== fri_query_step0_p[round][j][0];
+          merkle_caps[round][4].proof[j][1] <== fri_query_step0_p[round][j][1];
+          merkle_caps[round][4].proof[j][2] <== fri_query_step0_p[round][j][2];
+          merkle_caps[round][4].proof[j][3] <== fri_query_step0_p[round][j][3];
+        }
+        c_commit_merkle_cap[round][i] = RandomAccess2(FRI_COMMIT_MERKLE_CAP_HEIGHT(), 4);
+        for (var j = 0; j < FRI_COMMIT_MERKLE_CAP_HEIGHT(); j++) {
+          c_commit_merkle_cap[round][i].a[j][0] <== fri_commit_phase_merkle_caps[i][j][0];
+          c_commit_merkle_cap[round][i].a[j][1] <== fri_commit_phase_merkle_caps[i][j][1];
+          c_commit_merkle_cap[round][i].a[j][2] <== fri_commit_phase_merkle_caps[i][j][2];
+          c_commit_merkle_cap[round][i].a[j][3] <== fri_commit_phase_merkle_caps[i][j][3];
+        }
+        c_commit_merkle_cap[round][i].idx <== merkle_caps[round][4].index;
+        merkle_caps[round][4].digest[0] === c_commit_merkle_cap[round][i].out[0];
+        merkle_caps[round][4].digest[1] === c_commit_merkle_cap[round][i].out[1];
+        merkle_caps[round][4].digest[2] === c_commit_merkle_cap[round][i].out[2];
+        merkle_caps[round][4].digest[3] === c_commit_merkle_cap[round][i].out[3];
+      }
+
+      // step 1
+      if (i == 1) {
+        merkle_caps[round][5] = GetMerkleProofToCap(NUM_FRI_QUERY_STEP1_V() * 2,
+                                                    NUM_FRI_QUERY_STEP1_P());
+        merkle_caps[round][5].leaf_index <== coset_index[round][i].out;
+        for (var j = 0; j < NUM_FRI_QUERY_STEP1_V(); j++) {
+          merkle_caps[round][5].leaf[j * 2] <== fri_query_step1_v[round][j][0];
+          merkle_caps[round][5].leaf[j * 2 + 1] <== fri_query_step1_v[round][j][1];
+        }
+        for (var j = 0; j < NUM_FRI_QUERY_STEP1_P(); j++) {
+          merkle_caps[round][5].proof[j][0] <== fri_query_step1_p[round][j][0];
+          merkle_caps[round][5].proof[j][1] <== fri_query_step1_p[round][j][1];
+          merkle_caps[round][5].proof[j][2] <== fri_query_step1_p[round][j][2];
+          merkle_caps[round][5].proof[j][3] <== fri_query_step1_p[round][j][3];
+        }
+        c_commit_merkle_cap[round][i] = RandomAccess2(FRI_COMMIT_MERKLE_CAP_HEIGHT(), 4);
+        for (var j = 0; j < FRI_COMMIT_MERKLE_CAP_HEIGHT(); j++) {
+          c_commit_merkle_cap[round][i].a[j][0] <== fri_commit_phase_merkle_caps[i][j][0];
+          c_commit_merkle_cap[round][i].a[j][1] <== fri_commit_phase_merkle_caps[i][j][1];
+          c_commit_merkle_cap[round][i].a[j][2] <== fri_commit_phase_merkle_caps[i][j][2];
+          c_commit_merkle_cap[round][i].a[j][3] <== fri_commit_phase_merkle_caps[i][j][3];
+        }
+        c_commit_merkle_cap[round][i].idx <== merkle_caps[round][5].index;
+        merkle_caps[round][5].digest[0] === c_commit_merkle_cap[round][i].out[0];
+        merkle_caps[round][5].digest[1] === c_commit_merkle_cap[round][i].out[1];
+        merkle_caps[round][5].digest[2] === c_commit_merkle_cap[round][i].out[2];
+        merkle_caps[round][5].digest[3] === c_commit_merkle_cap[round][i].out[3];
+      }
+    }
   }
 }
