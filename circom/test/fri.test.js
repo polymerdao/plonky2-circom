@@ -1,6 +1,7 @@
 const path = require("path");
 const proof = require("./data/pwoi_proof.json");
 const challenges = require("./data/pwoi_challenges.json");
+const fs = require("fs");
 
 const wasm_tester = require("circom_tester").wasm;
 
@@ -48,6 +49,8 @@ describe("Verify Fri Proof Circuit Test", function () {
             fri_pow_response: challenges.fri_pow_response,
             fri_query_indices: challenges.fri_query_indices,
         };
+
+        fs.writeFileSync('input.json', JSON.stringify(input));
 
         const w = await circuit.calculateWitness(input, true);
 
