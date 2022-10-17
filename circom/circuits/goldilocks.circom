@@ -1,34 +1,23 @@
 pragma circom 2.0.9;
 include "./constants.circom";
-include "./goldilocks_inverse.circom";
+
+// Verifies x < 1 << N
+template LessNBits(N) {
+  signal input x;
+  var e2 = 1;
+  signal tmp1[64];
+  signal tmp2[65];
+  tmp2[0] <== 0;
+  for (var i = 0; i < 64; i++) {
+    tmp1[i] <-- (x >> i) & 1;
+    tmp1[i] * (tmp1[i] - 1) === 0;
+    tmp2[i + 1] <== tmp1[i] * e2 + tmp2[i];
+    e2 = e2 + e2;
+  }
+  x === tmp2[64];
+}
 
 // Gl: Goldilocks
-template GlAdd() {
-  signal input a;
-  signal input b;
-  signal output out;
-
-  var res = (a + b) % Order();
-  var over = a + b >= Order() ? 1 : 0;
-
-  out <-- res;
-  signal tmp1 <-- over;
-  signal tmp2 <== a + b;
-  signal tmp3 <== (1 - tmp1) * tmp2;
-  out === tmp1 * (tmp2 - Order()) + tmp3;
-}
-
-template GlSub() {
-  signal input a;
-  signal input b;
-  signal output out;
-
-  component cadd = GlAdd();
-  cadd.a <== a;
-  cadd.b <== Order() - b;
-  out <== cadd.out;
-}
-
 template GlReduce() {
   signal input x;
   signal output out;
@@ -36,8 +25,32 @@ template GlReduce() {
   var r = x % Order();
   var d = (x - r) / Order();
   out <-- r;
-  signal tmp <-- d;
-  tmp * Order() + out === x;
+  signal tmp0 <-- d;
+  tmp0 * Order() + out === x;
+
+  // verify 'out' < 2^64 (should be safe enough)
+  component c = LessNBits(64);
+  c.x <== out;
+}
+
+template GlAdd() {
+  signal input a;
+  signal input b;
+  signal output out;
+
+  component cr = GlReduce();
+  cr.x <== a + b;
+  out <== cr.out;
+}
+
+template GlSub() {
+  signal input a;
+  signal input b;
+  signal output out;
+
+  component cr = GlReduce();
+  cr.x <== a + Order() - b;
+  out <== cr.out;
 }
 
 template GlMul() {
@@ -48,6 +61,33 @@ template GlMul() {
   component cr = GlReduce();
   cr.x <== a * b;
   out <== cr.out;
+}
+
+function gl_inverse(x) {
+  var m = Order() - 2;
+  var e2 = x;
+  var res = 1;
+  for (var i = 0; i < 64; i++) {
+    if ((m >> i) & 1 == 1) {
+      res *= e2;
+      res %= Order();
+    }
+    e2 *= e2;
+    e2 %= Order();
+  }
+  return res;
+}
+
+template GlInv() {
+  signal input x;
+  signal output out;
+
+  component cr = GlReduce();
+  cr.x <-- gl_inverse(x);
+  out <== cr.out;
+  signal tmp1 <== out * x - 1;
+  signal tmp2 <== tmp1 / Order();
+  tmp1 === tmp2 * Order();
 }
 
 template GlDiv() {
@@ -107,4 +147,20 @@ template GlExp() {
   }
 
   out <== mul[64];
+}
+
+// out = x >> n
+// where n < N
+template RShift(N) {
+  signal input x;
+  signal output out;
+  assert(N < 255);
+
+  out <-- x >> N;
+  signal y <-- out << N;
+  signal r <== x - y;
+  out * 2 ** N === y;
+
+  component c = LessNBits(N);
+  c.x <== r;
 }

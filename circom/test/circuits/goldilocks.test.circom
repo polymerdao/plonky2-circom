@@ -32,6 +32,18 @@ template GlTest() {
   cexp.n <== n;
   cexp.out === expected;
 
+  component cgi = GlInv();
+  cgi.x <== 6784275835416866020;
+  cgi.out === 7154952498519749264;
+
+  component crs = RShift(2);
+  crs.x <== 4;
+  crs.out === 1;
+
+  component crs1 = RShift(2);
+  crs1.x <== 7;
+  crs1.out === 1;
+
   // Dummy input/output
   in === 1;
   out <== 1;
