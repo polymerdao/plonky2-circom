@@ -28,9 +28,10 @@ template GlReduce() {
   signal tmp0 <-- d;
   tmp0 * Order() + out === x;
 
-  // verify 'out' < 2^64 (should be safe enough)
-  component c = LessNBits(64);
-  c.x <== out;
+  // TODO: The circuits should be safe without the following verification
+  // verify 'out' < 2^64
+  // component c = LessNBits(64);
+  // c.x <== out;
 }
 
 template GlAdd() {
@@ -122,11 +123,11 @@ template GlExp() {
   signal output out;
 
   signal e2[65];
-  component rshift1[64];
   signal mul[65];
+  component rshift1[64];
   component cmul[64][2];
-  mul[0] <== 1;
   e2[0] <== x;
+  mul[0] <== 1;
   rshift1[0] = RShift1();
   rshift1[0].a <== n;
   for (var i = 0; i < 64; i++) {
