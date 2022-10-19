@@ -104,50 +104,17 @@ template GlDiv() {
   out <== a_mul_inv_b.out;
 }
 
-// bit = a & 1
-// out = a >> 1
+// bit = x & 1
+// out = x >> 1
 template RShift1() {
-  signal input a;
+  signal input x;
   signal output out;
   signal output bit;
 
-  var o = a >> 1;
+  var o = x >> 1;
   out <-- o;
-  bit <== a - out * 2;
+  bit <== x - out * 2;
   bit * (1 - bit) === 0;
-}
-
-template GlExp() {
-  signal input x;
-  signal input n;
-  signal output out;
-
-  signal e2[65];
-  signal mul[65];
-  component rshift1[64];
-  component cmul[64][2];
-  e2[0] <== x;
-  mul[0] <== 1;
-  rshift1[0] = RShift1();
-  rshift1[0].a <== n;
-  for (var i = 0; i < 64; i++) {
-    if (i > 0) {
-      rshift1[i] = RShift1();
-      rshift1[i].a <== rshift1[i - 1].out;
-    }
-
-    cmul[i][0] = GlMul();
-    cmul[i][1] = GlMul();
-    cmul[i][0].a <== mul[i];
-    cmul[i][0].b <== e2[i] * rshift1[i].bit + 1 - rshift1[i].bit;
-    cmul[i][1].a <== e2[i];
-    cmul[i][1].b <== e2[i];
-
-    mul[i + 1] <== cmul[i][0].out;
-    e2[i + 1] <== cmul[i][1].out;
-  }
-
-  out <== mul[64];
 }
 
 // out = x >> n
@@ -164,4 +131,62 @@ template RShift(N) {
 
   component c = LessNBits(N);
   c.x <== r;
+}
+
+template GlExp() {
+  signal input x;
+  signal input n;
+  signal output out;
+
+  signal e2[65];
+  signal mul[65];
+  component rshift1[64];
+  component cmul[64][2];
+  e2[0] <== x;
+  mul[0] <== 1;
+  rshift1[0] = RShift1();
+  rshift1[0].x <== n;
+  for (var i = 0; i < 64; i++) {
+    if (i > 0) {
+      rshift1[i] = RShift1();
+      rshift1[i].x <== rshift1[i - 1].out;
+    }
+
+    cmul[i][0] = GlMul();
+    cmul[i][1] = GlMul();
+    cmul[i][0].a <== mul[i];
+    cmul[i][0].b <== e2[i] * rshift1[i].bit + 1 - rshift1[i].bit;
+    cmul[i][1].a <== e2[i];
+    cmul[i][1].b <== e2[i];
+
+    mul[i + 1] <== cmul[i][0].out;
+    e2[i + 1] <== cmul[i][1].out;
+  }
+
+  out <== mul[64];
+}
+
+// input: 10011 (N = 5)
+// output: 11001
+template ReverseBits(N) {
+  signal input x;
+  signal output out;
+  component rshift[N];
+  signal tmp[N];
+
+  for (var i = 0; i < N; i++) {
+    rshift[i] = RShift1();
+    if (i == 0) {
+      rshift[0].x <== x;
+    } else {
+      rshift[i].x <== rshift[i - 1].out;
+    }
+
+    if (i == 0) {
+      tmp[i] <== rshift[i].bit;
+    } else {
+      tmp[i] <== rshift[i].bit + 2 * tmp[i - 1];
+    }
+  }
+  out <== tmp[N - 1];
 }

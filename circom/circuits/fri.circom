@@ -23,7 +23,7 @@ template GetMerkleProofToCap(nLeaf, nProof) {
   signal cur_digest[nProof + 1][4];
 
   shift[0] = RShift1();
-  shift[0].a <== leaf_index;
+  shift[0].x <== leaf_index;
   cur_digest[0][0] <== c_digest.out[0];
   cur_digest[0][1] <== c_digest.out[1];
   cur_digest[0][2] <== c_digest.out[2];
@@ -73,7 +73,7 @@ template GetMerkleProofToCap(nLeaf, nProof) {
 
     if (i < nProof - 1) {
       shift[i + 1] = RShift1();
-      shift[i + 1].a <== shift[i].out;
+      shift[i + 1].x <== shift[i].out;
     }
   }
 
@@ -156,7 +156,18 @@ template VerifyFriProof() {
   signal output out;
   out <== 1;
 
-  // Reduce 1
+  signal subgroup_x[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()][2];
+  signal old_eval[NUM_FRI_QUERY_ROUND()][2];
+  component c_gl_mul[NUM_FRI_QUERY_ROUND()][1];
+  component c_gl_exp[NUM_FRI_QUERY_ROUND()][1];
+  component c_mul[NUM_FRI_QUERY_ROUND()][2];
+  component c_exp[NUM_FRI_QUERY_ROUND()][1];
+  component c_add[NUM_FRI_QUERY_ROUND()][1];
+  component c_sub[NUM_FRI_QUERY_ROUND()][4];
+  component c_div[NUM_FRI_QUERY_ROUND()][2];
+  component c_reverse_bits[NUM_FRI_QUERY_ROUND()][1];
+  component c_reduce[NUM_FRI_QUERY_ROUND()][5];
+
   signal precomputed_reduced_evals[2][2];
   component reduce[7];
   reduce[5] = Reduce(NUM_OPENINGS_CONSTANTS());
@@ -237,7 +248,7 @@ template VerifyFriProof() {
   component c_commit_merkle_cap[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()];
 
   // TODO: for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
-  for (var round = 0; round < 2; round++) {
+  for (var round = 0; round < 1; round++) {
     // constants_sigmas
     merkle_caps[round][0] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V(),
                                                 NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_P());
@@ -343,6 +354,125 @@ template VerifyFriProof() {
     merkle_caps[round][3].digest[1] === c_quotient_polys_cap[round].out[1];
     merkle_caps[round][3].digest[2] === c_quotient_polys_cap[round].out[2];
     merkle_caps[round][3].digest[3] === c_quotient_polys_cap[round].out[3];
+
+
+    c_reverse_bits[round][0] = ReverseBits(LOG_SIZE_OF_LDE_DOMAIN());
+    c_reverse_bits[round][0].x <== fri_query_indices[round];
+    c_gl_exp[round][0] = GlExp();
+    c_gl_exp[round][0].x <== PRIMITIVE_ROOT_OF_UNITY_LDE();
+    c_gl_exp[round][0].n <== c_reverse_bits[round][0].out;
+    c_gl_mul[round][0] = GlMul();
+    c_gl_mul[round][0].a <== MULTIPLICATIVE_GROUP_GENERATOR();
+    c_gl_mul[round][0].b <== c_gl_exp[round][0].out;
+    subgroup_x[round][0][0] <== c_gl_mul[round][0].out;
+    subgroup_x[round][0][1] <== 0;
+
+//    c_exp[round][1] = GlExtExp();
+//    c_exp[round][1].x[0] <== fri_alpha[0];
+//    c_exp[round][1].x[1] <== fri_alpha[1];
+//    c_exp[round][1].n <== NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V() + NUM_FRI_QUERY_INIT_WIRES_V() +
+//                          NUM_FRI_QUERY_INIT_ZS_PARTIAL_V() + NUM_FRI_QUERY_INIT_ZS_PARTIAL_V();
+//    c_mul[round][1] = GlExtMul();
+//    c_mul[round][1].a[0] <== c_exp[round][1].out[0];
+//    c_mul[round][1].a[1] <== c_exp[round][1].out[1];
+//    c_mul[round][1].b[0] <== 0;  TODO: bug in Plonky2?
+//    c_mul[round][1].b[1] <== 0;
+
+    c_reduce[round][0] = Reduce(NUM_FRI_QUERY_INIT_QUOTIENT_V());
+    c_reduce[round][1] = Reduce(NUM_FRI_QUERY_INIT_ZS_PARTIAL_V());
+    c_reduce[round][2] = Reduce(NUM_FRI_QUERY_INIT_WIRES_V());
+    c_reduce[round][3] = Reduce(NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V());
+    c_reduce[round][4] = Reduce(NUM_CHALLENGES());
+    for (var i = 0; i < 5; i++) {
+      c_reduce[round][i].alpha[0] <== fri_alpha[0];
+      c_reduce[round][i].alpha[1] <== fri_alpha[1];
+    }
+    c_reduce[round][0].old_eval[0] <== 0;
+    c_reduce[round][0].old_eval[1] <== 0;
+    c_reduce[round][4].old_eval[0] <== 0;
+    c_reduce[round][4].old_eval[1] <== 0;
+    for (var i = 0; i < NUM_FRI_QUERY_INIT_QUOTIENT_V(); i++) {
+      c_reduce[round][0].in[i][0] <== fri_query_init_quotient_v[round][i];
+      c_reduce[round][0].in[i][1] <== 0;
+    }
+    for (var i = 0; i < NUM_FRI_QUERY_INIT_ZS_PARTIAL_V(); i++) {
+      c_reduce[round][1].in[i][0] <== fri_query_init_zs_partial_v[round][i];
+      c_reduce[round][1].in[i][1] <== 0;
+    }
+    for (var i = 0; i < NUM_FRI_QUERY_INIT_WIRES_V(); i++) {
+      c_reduce[round][2].in[i][0] <== fri_query_init_wires_v[round][i];
+      c_reduce[round][2].in[i][1] <== 0;
+    }
+    for (var i = 0; i < NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V(); i++) {
+      c_reduce[round][3].in[i][0] <== fri_query_init_constants_sigmas_v[round][i];
+      c_reduce[round][3].in[i][1] <== 0;
+    }
+    for (var i = 0; i < NUM_CHALLENGES(); i++) {
+      c_reduce[round][4].in[i][0] <== fri_query_init_zs_partial_v[round][i];
+      c_reduce[round][4].in[i][1] <== 0;
+    }
+    c_reduce[round][1].old_eval[0] <== c_reduce[round][0].out[0];
+    c_reduce[round][1].old_eval[1] <== c_reduce[round][0].out[1];
+    c_reduce[round][2].old_eval[0] <== c_reduce[round][1].out[0];
+    c_reduce[round][2].old_eval[1] <== c_reduce[round][1].out[1];
+    c_reduce[round][3].old_eval[0] <== c_reduce[round][2].out[0];
+    c_reduce[round][3].old_eval[1] <== c_reduce[round][2].out[1];
+
+    c_sub[round][0] = GlExtSub();
+    c_sub[round][0].a[0] <== c_reduce[round][3].out[0];
+    c_sub[round][0].a[1] <== c_reduce[round][3].out[1];
+    c_sub[round][0].b[0] <== precomputed_reduced_evals[0][0];
+    c_sub[round][0].b[1] <== precomputed_reduced_evals[0][1];
+    c_sub[round][1] = GlExtSub();
+    c_sub[round][1].a[0] <== subgroup_x[round][0][0];
+    c_sub[round][1].a[1] <== subgroup_x[round][0][1];
+    c_sub[round][1].b[0] <== plonk_zeta[0];
+    c_sub[round][1].b[1] <== plonk_zeta[1];
+    c_div[round][0] = GlExtDiv();
+    c_div[round][0].a[0] <== c_sub[round][0].out[0];
+    c_div[round][0].a[1] <== c_sub[round][0].out[1];
+    c_div[round][0].b[0] <== c_sub[round][1].out[0];
+    c_div[round][0].b[1] <== c_sub[round][1].out[1];
+
+    c_exp[round][0] = GlExtExp();
+    c_exp[round][0].x[0] <== fri_alpha[0];
+    c_exp[round][0].x[1] <== fri_alpha[1];
+    c_exp[round][0].n <== NUM_CHALLENGES();
+    c_mul[round][0] = GlExtMul();
+    c_mul[round][0].a[0] <== c_exp[round][0].out[0];
+    c_mul[round][0].a[1] <== c_exp[round][0].out[1];
+    c_mul[round][0].b[0] <== c_div[round][0].out[0];
+    c_mul[round][0].b[1] <== c_div[round][0].out[1];
+
+    c_sub[round][2] = GlExtSub();
+    c_sub[round][2].a[0] <== c_reduce[round][4].out[0];
+    c_sub[round][2].a[1] <== c_reduce[round][4].out[1];
+    c_sub[round][2].b[0] <== precomputed_reduced_evals[1][0];
+    c_sub[round][2].b[1] <== precomputed_reduced_evals[1][1];
+    c_sub[round][3] = GlExtSub();
+    c_sub[round][3].a[0] <== subgroup_x[round][0][0];
+    c_sub[round][3].a[1] <== subgroup_x[round][0][1];
+    c_sub[round][3].b[0] <== zeta_next.out[0];
+    c_sub[round][3].b[1] <== zeta_next.out[1];
+    c_div[round][1] = GlExtDiv();
+    c_div[round][1].a[0] <== c_sub[round][2].out[0];
+    c_div[round][1].a[1] <== c_sub[round][2].out[1];
+    c_div[round][1].b[0] <== c_sub[round][3].out[0];
+    c_div[round][1].b[1] <== c_sub[round][3].out[1];
+    c_add[round][0] = GlExtAdd();
+    c_add[round][0].a[0] <== c_mul[round][0].out[0];
+    c_add[round][0].a[1] <== c_mul[round][0].out[1];
+    c_add[round][0].b[0] <== c_div[round][1].out[0];
+    c_add[round][0].b[1] <== c_div[round][1].out[1];
+
+    c_mul[round][1] = GlExtMul();
+    c_mul[round][1].a[0] <== c_add[round][0].out[0];
+    c_mul[round][1].a[1] <== c_add[round][0].out[1];
+    c_mul[round][1].b[0] <== subgroup_x[round][0][0];
+    c_mul[round][1].b[1] <== subgroup_x[round][0][1];
+
+    old_eval[round][0] <== c_mul[round][1].out[0];
+    old_eval[round][1] <== c_mul[round][1].out[1];
 
     for (var i = 0; i < NUM_REDUCTION_ARITY_BITS(); i++) {
       coset_index[round][i] = RShift(arity_bits[i]);

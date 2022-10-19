@@ -44,6 +44,10 @@ template GlTest() {
   crs1.x <== 7;
   crs1.out === 1;
 
+  component crb = ReverseBits(5);
+  crb.x <== 19;
+  crb.out === 25;
+
   // Dummy input/output
   in === 1;
   out <== 1;
