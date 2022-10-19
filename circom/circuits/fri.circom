@@ -3,6 +3,7 @@ include "./constants.circom";
 include "./poseidon.circom";
 include "./utils.circom";
 include "./goldilocks.circom";
+include "./goldilocks_ext.circom";
 
 template GetMerkleProofToCap(nLeaf, nProof) {
   signal input leaf[nLeaf];
@@ -83,6 +84,38 @@ template GetMerkleProofToCap(nLeaf, nProof) {
   index <== shift[nProof - 1].out;
 }
 
+template Reduce(N) {
+  signal input in[N][2];
+  signal input alpha[2];
+  signal input old_eval[2];
+  signal output out[2];
+
+  component add[N];
+  component mul[N];
+
+  for (var i = N; i > 0; i--) {
+    add[i - 1] = GlExtAdd();
+    mul[i - 1] = GlExtMul();
+    if (i == N) {
+      mul[i - 1].a[0] <== old_eval[0];
+      mul[i - 1].a[1] <== old_eval[1];
+    } else {
+      mul[i - 1].a[0] <== add[i].out[0];
+      mul[i - 1].a[1] <== add[i].out[1];
+    }
+    mul[i - 1].b[0] <== alpha[0];
+    mul[i - 1].b[1] <== alpha[1];
+
+    add[i - 1].a[0] <== in[i - 1][0];
+    add[i - 1].a[1] <== in[i - 1][1];
+    add[i - 1].b[0] <== mul[i - 1].out[0];
+    add[i - 1].b[1] <== mul[i - 1].out[1];
+  }
+
+  out[0] <== add[0].out[0];
+  out[1] <== add[0].out[1];
+}
+
 template VerifyFriProof() {
   signal input wires_cap[NUM_WIRES_CAP()][4];
   signal input plonk_zs_partial_products_cap[NUM_PLONK_ZS_PARTIAL_PRODUCTS_CAP()][4];
@@ -122,6 +155,69 @@ template VerifyFriProof() {
   signal output out;
   out <== 1;
 
+  // Reduce 1
+  signal precomputed_reduced_evals[2][2];
+  component reduce[7];
+  reduce[5] = Reduce(NUM_OPENINGS_CONSTANTS());
+  reduce[4] = Reduce(NUM_OPENINGS_PLONK_SIGMAS());
+  reduce[3] = Reduce(NUM_OPENINGS_WIRES());
+  reduce[2] = Reduce(NUM_OPENINGS_PLONK_ZS());
+  reduce[1] = Reduce(NUM_OPENINGS_PARTIAL_PRODUCTS());
+  reduce[0] = Reduce(NUM_OPENINGS_QUOTIENT_POLYS());
+  reduce[6] = Reduce(NUM_OPENINGS_PLONK_ZS_NEXT());
+
+  for (var i = 0; i < 7; i++) {
+    reduce[i].alpha[0] <== fri_alpha[0];
+    reduce[i].alpha[1] <== fri_alpha[1];
+  }
+
+  reduce[0].old_eval[0] <== 0;
+  reduce[0].old_eval[1] <== 0;
+  reduce[6].old_eval[0] <== 0;
+  reduce[6].old_eval[1] <== 0;
+  for (var i = 0; i < NUM_OPENINGS_QUOTIENT_POLYS(); i++) {
+    reduce[0].in[i][0] <== openings_quotient_polys[i][0];
+    reduce[0].in[i][1] <== openings_quotient_polys[i][1];
+  }
+  for (var i = 0; i < NUM_OPENINGS_PARTIAL_PRODUCTS(); i++) {
+    reduce[1].in[i][0] <== openings_partial_products[i][0];
+    reduce[1].in[i][1] <== openings_partial_products[i][1];
+  }
+  for (var i = 0; i < NUM_OPENINGS_PLONK_ZS(); i++) {
+    reduce[2].in[i][0] <== openings_plonk_zs[i][0];
+    reduce[2].in[i][1] <== openings_plonk_zs[i][1];
+  }
+  for (var i = 0; i < NUM_OPENINGS_WIRES(); i++) {
+    reduce[3].in[i][0] <== openings_wires[i][0];
+    reduce[3].in[i][1] <== openings_wires[i][1];
+  }
+  for (var i = 0; i < NUM_OPENINGS_PLONK_SIGMAS(); i++) {
+    reduce[4].in[i][0] <== openings_plonk_sigmas[i][0];
+    reduce[4].in[i][1] <== openings_plonk_sigmas[i][1];
+  }
+  for (var i = 0; i < NUM_OPENINGS_CONSTANTS(); i++) {
+    reduce[5].in[i][0] <== openings_constants[i][0];
+    reduce[5].in[i][1] <== openings_constants[i][1];
+  }
+  for (var i = 0; i < NUM_OPENINGS_PLONK_ZS_NEXT(); i++) {
+    reduce[6].in[i][0] <== openings_plonk_zs_next[i][0];
+    reduce[6].in[i][1] <== openings_plonk_zs_next[i][1];
+  }
+
+  for (var i = 1; i < 6; i++) {
+    reduce[i].old_eval[0] <== reduce[i - 1].out[0];
+    reduce[i].old_eval[1] <== reduce[i - 1].out[1];
+  }
+  precomputed_reduced_evals[0][0] <== reduce[5].out[0];
+  precomputed_reduced_evals[0][1] <== reduce[5].out[1];
+  precomputed_reduced_evals[1][0] <== reduce[6].out[0];
+  precomputed_reduced_evals[1][1] <== reduce[6].out[1];
+
+//  log(precomputed_reduced_evals[0][0]);
+//  log(precomputed_reduced_evals[0][1]);
+//  log(precomputed_reduced_evals[1][0]);
+//  log(precomputed_reduced_evals[1][1]);
+
   assert(NUM_REDUCTION_ARITY_BITS() == 2);
   var arity_bits[NUM_REDUCTION_ARITY_BITS()] = REDUCTION_ARITY_BITS();
   signal arity[NUM_REDUCTION_ARITY_BITS()];
@@ -137,8 +233,8 @@ template VerifyFriProof() {
   component c_quotient_polys_cap[NUM_FRI_QUERY_ROUND()];
   component c_commit_merkle_cap[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()];
 
-  for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
-  // for (var round = 0; round < 2; round++) {
+  // TODO: for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
+  for (var round = 0; round < 2; round++) {
     // constants_sigmas
     merkle_caps[round][0] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V(),
                                                 NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_P());

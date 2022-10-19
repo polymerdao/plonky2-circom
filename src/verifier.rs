@@ -681,10 +681,7 @@ pub fn generate_circom_verifier<
             + &*reduction_arity_bits[i].to_string()
             + ";\n");
     }
-    constants = constants.replace(
-        "  $SET_REDUCTION_ARITY_BITS;\n",
-        &*reduction_arity_bits_str,
-    );
+    constants = constants.replace("  $SET_REDUCTION_ARITY_BITS;\n", &*reduction_arity_bits_str);
     constants = constants.replace(
         "$NUM_REDUCTION_ARITY_BITS",
         &*reduction_arity_bits.len().to_string(),
