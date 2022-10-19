@@ -146,6 +146,7 @@ template VerifyFriProof() {
   signal input fri_pow_witness;
 
   // Challenges
+  signal input plonk_zeta[2];
   signal input fri_alpha[2];
   signal input fri_betas[NUM_FRI_COMMIT_ROUND()][2];
   signal input fri_pow_response;
@@ -213,10 +214,12 @@ template VerifyFriProof() {
   precomputed_reduced_evals[1][0] <== reduce[6].out[0];
   precomputed_reduced_evals[1][1] <== reduce[6].out[1];
 
-//  log(precomputed_reduced_evals[0][0]);
-//  log(precomputed_reduced_evals[0][1]);
-//  log(precomputed_reduced_evals[1][0]);
-//  log(precomputed_reduced_evals[1][1]);
+  component zeta_next = GlExtMul();
+  var g[2] = G_FROM_DEGREE_BITS();
+  zeta_next.a[0] <== g[0];
+  zeta_next.a[1] <== g[1];
+  zeta_next.b[0] <== plonk_zeta[0];
+  zeta_next.b[1] <== plonk_zeta[1];
 
   assert(NUM_REDUCTION_ARITY_BITS() == 2);
   var arity_bits[NUM_REDUCTION_ARITY_BITS()] = REDUCTION_ARITY_BITS();

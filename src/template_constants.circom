@@ -47,3 +47,11 @@ function REDUCTION_ARITY_BITS() {
   $SET_REDUCTION_ARITY_BITS;
   return bits;
 }
+
+function G_FROM_DEGREE_BITS() {
+  var g[2];
+  g[0] = $G_FROM_DEGREE_BITS_0;
+  g[1] = $G_FROM_DEGREE_BITS_1;
+  return g;
+}
+

@@ -44,6 +44,7 @@ describe("Verify Fri Proof Circuit Test", function () {
             fri_final_poly_ext_v: proof.fri_final_poly_ext_v,
             fri_pow_witness: proof.fri_pow_witness,
 
+            plonk_zeta: challenges.plonk_zeta,
             fri_alpha: challenges.fri_alpha,
             fri_betas: challenges.fri_betas,
             fri_pow_response: challenges.fri_pow_response,
