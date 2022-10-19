@@ -48,6 +48,10 @@ template GlTest() {
   crb.x <== 19;
   crb.out === 25;
 
+  component clb = LastNBits(3);
+  clb.x <== 19;
+  clb.out === 3;
+
   // Dummy input/output
   in === 1;
   out <== 1;

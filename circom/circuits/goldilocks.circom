@@ -166,6 +166,21 @@ template GlExp() {
   out <== mul[64];
 }
 
+template GlExpPowerOf2(N) {
+  signal input x;
+  signal output out;
+  component mul[N];
+  mul[0] = GlMul();
+  mul[0].a <== x;
+  mul[0].b <== x;
+  for (var i = 1; i < N; i++) {
+    mul[i] = GlMul();
+    mul[i].a <== mul[i - 1].out;
+    mul[i].b <== mul[i - 1].out;
+  }
+  out <== mul[N - 1].out;
+}
+
 // input: 10011 (N = 5)
 // output: 11001
 template ReverseBits(N) {
@@ -186,6 +201,31 @@ template ReverseBits(N) {
       tmp[i] <== rshift[i].bit;
     } else {
       tmp[i] <== rshift[i].bit + 2 * tmp[i - 1];
+    }
+  }
+  out <== tmp[N - 1];
+}
+
+// input: 10011 (N = 3)
+// output: 011
+template LastNBits(N) {
+  signal input x;
+  signal output out;
+  component rshift[N];
+  signal tmp[N];
+
+  for (var i = 0; i < N; i++) {
+    rshift[i] = RShift1();
+    if (i == 0) {
+      rshift[0].x <== x;
+    } else {
+      rshift[i].x <== rshift[i - 1].out;
+    }
+
+    if (i == 0) {
+      tmp[i] <== rshift[i].bit;
+    } else {
+      tmp[i] <== 2**i * rshift[i].bit + tmp[i - 1];
     }
   }
   out <== tmp[N - 1];
