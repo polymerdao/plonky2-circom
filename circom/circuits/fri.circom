@@ -213,6 +213,10 @@ template VerifyFriProof() {
   signal input fri_pow_response;
   signal input fri_query_indices[NUM_FRI_QUERY_ROUND()];
 
+  // fri_verify_proof_of_work
+  component check = LessNBits(64 - MIN_FRI_POW_RESPONSE());
+  check.x <== fri_pow_response;
+
   // TODO: remove out
   signal output out;
   out <== 1;
@@ -295,7 +299,7 @@ template VerifyFriProof() {
   assert(NUM_REDUCTION_ARITY_BITS() == 2);
   var arity_bits[NUM_REDUCTION_ARITY_BITS()] = REDUCTION_ARITY_BITS();
 
-  signal subgroup_x[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()][2];
+  signal subgroup_x[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS() + 1][2];
   signal old_eval[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS() + 1][2];
   signal points[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()][16];
   signal l_x[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()][16][2];
@@ -325,9 +329,10 @@ template VerifyFriProof() {
   component c_plonk_zs_partial_products_cap[NUM_FRI_QUERY_ROUND()];
   component c_quotient_polys_cap[NUM_FRI_QUERY_ROUND()];
   component c_commit_merkle_cap[NUM_FRI_QUERY_ROUND()][NUM_REDUCTION_ARITY_BITS()];
+  component c_final_eval_mul[NUM_FRI_QUERY_ROUND()][NUM_FRI_FINAL_POLY_EXT_V()];
+  component c_final_eval_add[NUM_FRI_QUERY_ROUND()][NUM_FRI_FINAL_POLY_EXT_V()];
 
-  // TODO: for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
-  for (var round = 0; round < 3; round++) {
+  for (var round = 0; round < NUM_FRI_QUERY_ROUND(); round++) {
     // constants_sigmas
     merkle_caps[round][0] = GetMerkleProofToCap(NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V(),
                                                 NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_P());
@@ -742,12 +747,30 @@ template VerifyFriProof() {
         merkle_caps[round][5].digest[3] === c_commit_merkle_cap[round][i].out[3];
       }
 
-      if (i < NUM_REDUCTION_ARITY_BITS() - 1) {
-        p_exp2[round][i] = GlExpPowerOf2(arity_bits[i]);
-        p_exp2[round][i].x <== subgroup_x[round][i][0];
-        subgroup_x[round][i + 1][0] <== p_exp2[round][i].out;
-        subgroup_x[round][i + 1][1] <== subgroup_x[round][i][1];
-      }
+      p_exp2[round][i] = GlExpPowerOf2(arity_bits[i]);
+      p_exp2[round][i].x <== subgroup_x[round][i][0];
+      subgroup_x[round][i + 1][0] <== p_exp2[round][i].out;
+      subgroup_x[round][i + 1][1] <== subgroup_x[round][i][1];
     }
+
+    for (var i = NUM_FRI_FINAL_POLY_EXT_V(); i > 0; i--) {
+      c_final_eval_mul[round][i - 1] = GlExtMul();
+      c_final_eval_add[round][i - 1] = GlExtAdd();
+      if (i == NUM_FRI_FINAL_POLY_EXT_V()) {
+        c_final_eval_mul[round][i - 1].a[0] <== 0;
+        c_final_eval_mul[round][i - 1].a[1] <== 0;
+      } else {
+        c_final_eval_mul[round][i - 1].a[0] <== c_final_eval_add[round][i].out[0];
+        c_final_eval_mul[round][i - 1].a[1] <== c_final_eval_add[round][i].out[1];
+      }
+      c_final_eval_mul[round][i - 1].b[0] <== subgroup_x[round][NUM_REDUCTION_ARITY_BITS()][0];
+      c_final_eval_mul[round][i - 1].b[1] <== subgroup_x[round][NUM_REDUCTION_ARITY_BITS()][1];
+      c_final_eval_add[round][i - 1].a[0] <== fri_final_poly_ext_v[i - 1][0];
+      c_final_eval_add[round][i - 1].a[1] <== fri_final_poly_ext_v[i - 1][1];
+      c_final_eval_add[round][i - 1].b[0] <== c_final_eval_mul[round][i - 1].out[0];
+      c_final_eval_add[round][i - 1].b[1] <== c_final_eval_mul[round][i - 1].out[1];
+    }
+    old_eval[round][NUM_REDUCTION_ARITY_BITS()][0] === c_final_eval_add[round][0].out[0];
+    old_eval[round][NUM_REDUCTION_ARITY_BITS()][1] === c_final_eval_add[round][0].out[1];
   }
 }
