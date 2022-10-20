@@ -48,6 +48,15 @@ function REDUCTION_ARITY_BITS() {
   return bits;
 }
 
+function G_BY_ARITY_BITS(arity_bits) {
+  var g_arity_bits[4];
+  g_arity_bits[0] = $G_ARITY_BITS_1;
+  g_arity_bits[1] = $G_ARITY_BITS_2;
+  g_arity_bits[2] = $G_ARITY_BITS_3;
+  g_arity_bits[3] = $G_ARITY_BITS_4;
+  return g_arity_bits[arity_bits - 1];
+}
+
 function G_FROM_DEGREE_BITS() {
   var g[2];
   g[0] = $G_FROM_DEGREE_BITS_0;
