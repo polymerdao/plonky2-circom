@@ -26,9 +26,10 @@ template GlReduce() {
   var d = (x - r) / Order();
   out <-- r;
   signal tmp0 <-- d;
-  tmp0 * Order() + out === x;
+  signal order <== Order();
+  tmp0 * order + out === x;
 
-  // TODO: The circuits should be safe without the following verification
+  // TODO: The circuits should be safe without the range checks?
   // verify 'out' < 2^64
   // component c = LessNBits(64);
   // c.x <== out;
