@@ -790,11 +790,16 @@ pub fn generate_circom_verifier<
         &*common.config.num_challenges.to_string(),
     );
 
-    let circuit_digest = common.circuit_digest;
-    constants = constants.replace(
-        "$CIRCUIT_DIGEST",
-        &*("0x".to_owned() + &encode_hex(&circuit_digest.to_bytes())),
-    );
+    let circuit_digest = common.circuit_digest.to_vec();
+    let mut circuit_digest_str = "".to_owned();
+    for i in 0..circuit_digest.len() {
+        circuit_digest_str += &*("  cd[".to_owned()
+            + &*i.to_string()
+            + "] = "
+            + &*circuit_digest[i].to_canonical_u64().to_string()
+            + ";\n");
+    }
+    constants = constants.replace("  $SET_CIRCUIT_DIGEST;\n", &*circuit_digest_str);
 
     constants = constants.replace(
         "$FRI_RATE_BITS",
@@ -1219,10 +1224,6 @@ mod tests {
 
         let mut circom_file = File::create("./circom/circuits/constants.circom")?;
         circom_file.write_all(circom_constants.as_bytes())?;
-        // sol_file = File::create("./contract/contracts/GatesLib.sol")?;
-        // sol_file.write_all(gates_lib.as_bytes())?;
-        // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
-        // sol_file.write_all(proof_lib.as_bytes())?;
 
         let proof_json = generate_proof_base64(&proof, &conf)?;
 
@@ -1268,17 +1269,14 @@ mod tests {
             ..high_rate_config
         };
 
-        let (proof, _, _) = dummy_proof::<F, C, D>(&final_config, 4_000, 4)?;
+        let (proof, vd, cd) = dummy_proof::<F, C, D>(&final_config, 4_000, 4)?;
 
         let conf = generate_verifier_config(&proof)?;
-        // let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
+        let (circom_constants, _, _) = generate_circom_verifier(&conf, &cd, &vd)?;
 
-        // let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
-        // sol_file.write_all(contract.as_bytes())?;
-        // sol_file = File::create("./contract/contracts/GatesLib.sol")?;
-        // sol_file.write_all(gates_lib.as_bytes())?;
-        // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
-        // sol_file.write_all(proof_lib.as_bytes())?;
+        let mut circom_file = File::create("./circom/circuits/constants.circom")?;
+        circom_file.write_all(circom_constants.as_bytes())?;
+
 
         let proof_json = generate_proof_base64(&proof, &conf)?;
 

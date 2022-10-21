@@ -69,3 +69,11 @@ function PRIMITIVE_ROOT_OF_UNITY_LDE() { return $PRIMITIVE_ROOT_OF_UNITY_LDE; }
 function LOG_SIZE_OF_LDE_DOMAIN() { return $LOG_SIZE_OF_LDE_DOMAIN; }
 function NUM_CHALLENGES() { return $NUM_CHALLENGES; }
 function MIN_FRI_POW_RESPONSE() { return $MIN_FRI_POW_RESPONSE; }
+function CIRCUIT_DIGEST() {
+  var cd[4];
+  $SET_CIRCUIT_DIGEST;
+  return cd;
+}
+function SPONGE_RATE() { return 8; }
+function SPONGE_CAPACITY() { return 4; }
+function SPONGE_WIDTH() { return 12; }
