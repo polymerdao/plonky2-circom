@@ -1,38 +1,40 @@
 pragma circom 2.0.9;
 include "./constants.circom";
 
+// Range check
 // Verifies x < 1 << N
 template LessNBits(N) {
   signal input x;
   var e2 = 1;
-  signal tmp1[64];
-  signal tmp2[65];
+  signal tmp1[N];
+  signal tmp2[N + 1];
   tmp2[0] <== 0;
-  for (var i = 0; i < 64; i++) {
+  for (var i = 0; i < N; i++) {
     tmp1[i] <-- (x >> i) & 1;
     tmp1[i] * (tmp1[i] - 1) === 0;
     tmp2[i + 1] <== tmp1[i] * e2 + tmp2[i];
     e2 = e2 + e2;
   }
-  x === tmp2[64];
+  x === tmp2[N];
 }
 
 // Gl: Goldilocks
-template GlReduce() {
+// range check d < 1 << N
+template GlReduce(N) {
   signal input x;
   signal output out;
 
   var r = x % Order();
-  var d = (x - r) / Order();
+  var d = (x - r) \ Order();
   out <-- r;
   signal tmp0 <-- d;
   signal order <== Order();
-  tmp0 * order + out === x;
+  tmp0 * Order() + out === x;
 
-  // TODO: The circuits should be safe without the range checks?
-  // verify 'out' < 2^64
-  // component c = LessNBits(64);
-  // c.x <== out;
+  component c0 = LessNBits(N);
+  c0.x <== tmp0;
+  component c1 = LessNBits(64);
+  c1.x <== out;
 }
 
 template GlAdd() {
@@ -40,7 +42,7 @@ template GlAdd() {
   signal input b;
   signal output out;
 
-  component cr = GlReduce();
+  component cr = GlReduce(1);
   cr.x <== a + b;
   out <== cr.out;
 }
@@ -50,7 +52,7 @@ template GlSub() {
   signal input b;
   signal output out;
 
-  component cr = GlReduce();
+  component cr = GlReduce(1);
   cr.x <== a + Order() - b;
   out <== cr.out;
 }
@@ -60,7 +62,7 @@ template GlMul() {
   signal input b;
   signal output out;
 
-  component cr = GlReduce();
+  component cr = GlReduce(64);
   cr.x <== a * b;
   out <== cr.out;
 }
@@ -84,11 +86,11 @@ template GlInv() {
   signal input x;
   signal output out;
 
-  component cr = GlReduce();
+  component cr = GlReduce(64);
   cr.x <-- gl_inverse(x);
   out <== cr.out;
   signal tmp1 <== out * x - 1;
-  signal tmp2 <== tmp1 / Order();
+  signal tmp2 <== tmp1 \ Order();
   tmp1 === tmp2 * Order();
 }
 

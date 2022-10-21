@@ -6,7 +6,7 @@ template MDS() {
     signal output out[12];
     component reduce[12];
     for (var i = 0; i < 12; i++) {
-        reduce[i] = GlReduce();
+        reduce[i] = GlReduce(74);
     }
 
     reduce[ 0].x <== 25*in[0] + 15*in[1] + 41*in[2] + 16*in[3] +  2*in[4] + 28*in[5] + 13*in[6] + 13*in[7] + 39*in[8] + 18*in[9] + 34*in[10] + 20*in[11];
@@ -151,9 +151,9 @@ template Poseidon(nOuts) {
         mds[i] = MDS();
         for (var j=0; j<12; j++) {
             var c = const[i*12+j];
-            f1_x2[i][j] = GlReduce();
-            f1_x4[i][j] = GlReduce();
-            f1_x6[i][j] = GlReduce();
+            f1_x2[i][j] = GlReduce(66);
+            f1_x4[i][j] = GlReduce(66);
+            f1_x6[i][j] = GlReduce(66);
             f1_x2[i][j].x <== (state[i][j] + c) * (state[i][j] + c);
             f1_x4[i][j].x <== f1_x2[i][j].out * f1_x2[i][j].out;
             f1_x6[i][j].x <== f1_x2[i][j].out * f1_x4[i][j].out;
@@ -167,9 +167,9 @@ template Poseidon(nOuts) {
     for (var i=0; i<22; i++) {
         var c = const[(4+i)*12];
         mds[4+i] = MDS();
-        p_x2[i] = GlReduce();
-        p_x4[i] = GlReduce();
-        p_x6[i] = GlReduce();
+        p_x2[i] = GlReduce(66);
+        p_x4[i] = GlReduce(66);
+        p_x6[i] = GlReduce(66);
         p_x2[i].x <== (state[4+i][0]+c) * (state[4+i][0]+c);
         p_x4[i].x <== p_x2[i].out * p_x2[i].out;
         p_x6[i].x <== p_x2[i].out * p_x4[i].out;
@@ -189,9 +189,9 @@ template Poseidon(nOuts) {
         mds[26+i] = MDS();
         for (var j=0; j<12; j++) {
             var c = const[(26+i)*12+j];
-            f2_x2[i][j] = GlReduce();
-            f2_x4[i][j] = GlReduce();
-            f2_x6[i][j] = GlReduce();
+            f2_x2[i][j] = GlReduce(66);
+            f2_x4[i][j] = GlReduce(66);
+            f2_x6[i][j] = GlReduce(66);
             f2_x2[i][j].x <== (state[26+i][j]+c) * (state[26+i][j]+c);
             f2_x4[i][j].x <== f2_x2[i][j].out * f2_x2[i][j].out;
             f2_x6[i][j].x <== f2_x2[i][j].out * f2_x4[i][j].out;
