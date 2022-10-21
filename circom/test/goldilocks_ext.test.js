@@ -8,7 +8,7 @@ describe("Goldilocks Ext Circuit Test", function () {
     this.timeout(10000000);
 
     before(async () => {
-        circuit = await wasm_tester(path.join(__dirname, "circuits", "goldilocks_ext.test.circom"), {});
+        circuit = await wasm_tester(path.join(__dirname, "circuits", "goldilocks_ext.test.circom"), {prime: "goldilocks"});
     });
 
     it("Should pass", async () => {

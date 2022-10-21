@@ -8,7 +8,7 @@ describe("Plonk eval_l1 Circuit Test", function () {
     this.timeout(10000000);
 
     before(async () => {
-        circuit = await wasm_tester(path.join(__dirname, "circuits", "plonk.test.circom"), {});
+        circuit = await wasm_tester(path.join(__dirname, "circuits", "plonk.test.circom"), {prime: "goldilocks"});
     });
 
     it("Should pass", async () => {

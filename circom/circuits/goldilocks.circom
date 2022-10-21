@@ -18,33 +18,12 @@ template LessNBits(N) {
   x === tmp2[N];
 }
 
-// Gl: Goldilocks
-// range check d < 1 << N
-template GlReduce(N) {
-  signal input x;
-  signal output out;
-
-  var r = x % Order();
-  var d = (x - r) \ Order();
-  out <-- r;
-  signal tmp0 <-- d;
-  signal order <== Order();
-  tmp0 * Order() + out === x;
-
-  component c0 = LessNBits(N);
-  c0.x <== tmp0;
-  component c1 = LessNBits(64);
-  c1.x <== out;
-}
-
 template GlAdd() {
   signal input a;
   signal input b;
   signal output out;
 
-  component cr = GlReduce(1);
-  cr.x <== a + b;
-  out <== cr.out;
+  out <== a + b;
 }
 
 template GlSub() {
@@ -52,9 +31,7 @@ template GlSub() {
   signal input b;
   signal output out;
 
-  component cr = GlReduce(1);
-  cr.x <== a + Order() - b;
-  out <== cr.out;
+  out <== a - b;
 }
 
 template GlMul() {
@@ -62,36 +39,15 @@ template GlMul() {
   signal input b;
   signal output out;
 
-  component cr = GlReduce(64);
-  cr.x <== a * b;
-  out <== cr.out;
-}
-
-function gl_inverse(x) {
-  var m = Order() - 2;
-  var e2 = x;
-  var res = 1;
-  for (var i = 0; i < 64; i++) {
-    if ((m >> i) & 1 == 1) {
-      res *= e2;
-      res %= Order();
-    }
-    e2 *= e2;
-    e2 %= Order();
-  }
-  return res;
+  out <== a * b;
 }
 
 template GlInv() {
   signal input x;
   signal output out;
 
-  component cr = GlReduce(64);
-  cr.x <-- gl_inverse(x);
-  out <== cr.out;
-  signal tmp1 <== out * x - 1;
-  signal tmp2 <== tmp1 \ Order();
-  tmp1 === tmp2 * Order();
+  out <-- 1/x;
+  out * x === 1;
 }
 
 template GlDiv() {

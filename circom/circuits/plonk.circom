@@ -16,15 +16,11 @@ template EvalL1() {
   cem.x[1] <== x[1];
   cem.n <== n;
 
-  component xn0 = GlReduce(64);
-  xn0.x <== x_sub_one[0] * n;
-  component xn1 = GlReduce(64);
-  xn1.x <== x_sub_one[1] * n;
   component ced = GlExtDiv();
   ced.a[0] <== cem.out[0] - 1;
   ced.a[1] <== cem.out[1];
-  ced.b[0] <== xn0.out;
-  ced.b[1] <== xn1.out;
+  ced.b[0] <== x_sub_one[0] * n;
+  ced.b[1] <== x_sub_one[1] * n;
 
   out[0] <== ced.out[0];
   out[1] <== ced.out[1];
