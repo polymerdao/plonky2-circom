@@ -208,9 +208,11 @@ template Poseidon(nOuts) {
 
 }
 
-template HashNoPad(nInputs) {
+template HashNoPad(nInputs, nOutputs) {
     signal input in[nInputs];
-    signal output out[4];
+    signal input capacity[4];
+    signal output out[nOutputs];
+    assert(nOutputs <= 12);
 
     var nHash = (nInputs + 7) \ 8;
     component cPoseidon[nHash];
@@ -219,10 +221,10 @@ template HashNoPad(nInputs) {
     for (var i = 0; i < nHash; i++) {
         cPoseidon[i] = Poseidon(12);
     }
-    cPoseidon[0].capacity[0] <== 0;
-    cPoseidon[0].capacity[1] <== 0;
-    cPoseidon[0].capacity[2] <== 0;
-    cPoseidon[0].capacity[3] <== 0;
+    cPoseidon[0].capacity[0] <== capacity[0];
+    cPoseidon[0].capacity[1] <== capacity[1];
+    cPoseidon[0].capacity[2] <== capacity[2];
+    cPoseidon[0].capacity[3] <== capacity[3];
 
     for (var i = 0; i < nHash; i++) {
         for (var j = 0; j < 8; j++) {
@@ -245,18 +247,17 @@ template HashNoPad(nInputs) {
         }
 
 //        for (var j=0; j<8; j++) {
-//          log(0, cPoseidon[i].in[j]);
+//          log(i, cPoseidon[i].in[j]);
 //        }
 //        for (var j=0; j<4; j++) {
-//          log(0, cPoseidon[i].capacity[j]);
+//          log(i, cPoseidon[i].capacity[j]);
 //        }
 //        for (var j=0; j<12; j++) {
-//          log(0, cPoseidon[i].out[j]);
+//          log(i, cPoseidon[i].out[j]);
 //        }
     }
 
-    out[0] <== cPoseidon[nHash - 1].out[0];
-    out[1] <== cPoseidon[nHash - 1].out[1];
-    out[2] <== cPoseidon[nHash - 1].out[2];
-    out[3] <== cPoseidon[nHash - 1].out[3];
+    for (var i = 0; i < nOutputs; i++) {
+        out[i] <== cPoseidon[nHash - 1].out[i];
+    }
 }
