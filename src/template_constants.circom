@@ -77,3 +77,5 @@ function CIRCUIT_DIGEST() {
 function SPONGE_RATE() { return 8; }
 function SPONGE_CAPACITY() { return 4; }
 function SPONGE_WIDTH() { return 12; }
+function DEGREE_BITS() { return $DEGREE_BITS; }
+function FRI_RATE_BITS() { return $FRI_RATE_BITS; }

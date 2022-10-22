@@ -18,6 +18,7 @@ template LessNBits(N) {
   x === tmp2[N];
 }
 
+// Native Goldilocks field must be used.
 template GlAdd() {
   signal input a;
   signal input b;
