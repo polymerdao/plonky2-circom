@@ -1277,7 +1277,6 @@ mod tests {
         let mut circom_file = File::create("./circom/circuits/constants.circom")?;
         circom_file.write_all(circom_constants.as_bytes())?;
 
-
         let proof_json = generate_proof_base64(&proof, &conf)?;
 
         if !Path::new("./circom/test/data").is_dir() {

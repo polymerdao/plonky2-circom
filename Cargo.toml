@@ -17,6 +17,10 @@ serde_json = "1.0.86"
 keccak-hash = "0.10.0"
 sha2 = "0.10.6"
 itertools = "0.10.5"
+#poseidon-rs = "0.0.8"
+poseidon-rs = { path = "../poseidon-rs" }
+num = { version = "0.4", features = [ "rand" ] }
+ff = { package="ff_ce" , version="0.11", features = ["derive"] }
 
 [profile.release]
 opt-level = 3
