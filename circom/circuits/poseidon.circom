@@ -233,7 +233,7 @@ template Poseidon_BN(nOuts) {
         gl_hashes[i * 3 + j][0] <== nBits[i].out[(2 - j) * 64];
         e2 = 2;
         for (var k = 1; k < 64; k++) {
-          gl_hashes[i * 3 + j][k] <== gl_hashes[i * 3 + j][k - 1] + nBits[i].out[(2 - j) * 64 + j] * e2;
+          gl_hashes[i * 3 + j][k] <== gl_hashes[i * 3 + j][k - 1] + nBits[i].out[(2 - j) * 64 + k] * e2;
           e2 = e2 + e2;
         }
       }
