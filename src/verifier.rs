@@ -1129,6 +1129,7 @@ mod tests {
     use std::io::Write;
     use std::path::Path;
 
+    use crate::config::PoseidonBN128GoldilocksConfig;
     use anyhow::Result;
     use plonky2::field::extension::Extendable;
     use plonky2::fri::reduction_strategies::FriReductionStrategy;
@@ -1142,9 +1143,7 @@ mod tests {
         gates::noop::NoopGate,
         iop::witness::PartialWitness,
         plonk::{
-            circuit_builder::CircuitBuilder,
-            circuit_data::CircuitConfig,
-            config::{GenericConfig, PoseidonGoldilocksConfig},
+            circuit_builder::CircuitBuilder, circuit_data::CircuitConfig, config::GenericConfig,
         },
     };
 
@@ -1191,7 +1190,7 @@ mod tests {
     #[test]
     fn test_verifier_without_public_inputs() -> Result<()> {
         const D: usize = 2;
-        type C = PoseidonGoldilocksConfig;
+        type C = PoseidonBN128GoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
         // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
@@ -1243,7 +1242,7 @@ mod tests {
     #[test]
     fn test_verifier_with_public_inputs() -> Result<()> {
         const D: usize = 2;
-        type C = PoseidonGoldilocksConfig;
+        type C = PoseidonBN128GoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
         // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
@@ -1295,7 +1294,7 @@ mod tests {
     #[test]
     fn test_recursive_verifier_without_public_inputs() -> Result<()> {
         const D: usize = 2;
-        type C = PoseidonGoldilocksConfig;
+        type C = PoseidonBN128GoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
 

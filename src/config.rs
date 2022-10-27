@@ -4,11 +4,17 @@ extern crate ff;
 use ff::*;
 use num::bigint::BigUint;
 use num::ToPrimitive;
+use plonky2::field::extension::quadratic::QuadraticExtension;
+use plonky2::field::extension::Extendable;
+use plonky2::field::goldilocks_field::GoldilocksField;
 use poseidon_rs::{Fr, Poseidon};
 
-use plonky2::hash::hash_types::{HashOut, RichField};
+use plonky2::hash::hash_types::{HashOut, HashOutTarget, RichField};
 use plonky2::hash::hashing::{compress, hash_n_to_hash_no_pad, PlonkyPermutation, SPONGE_WIDTH};
-use plonky2::plonk::config::Hasher;
+use plonky2::hash::poseidon::PoseidonHash;
+use plonky2::iop::target::{BoolTarget, Target};
+use plonky2::plonk::circuit_builder::CircuitBuilder;
+use plonky2::plonk::config::{AlgebraicHasher, GenericConfig, Hasher};
 
 pub struct PoseidonBN128Permutation;
 impl<F: RichField> PlonkyPermutation<F> for PoseidonBN128Permutation {
@@ -73,6 +79,40 @@ impl<F: RichField> Hasher<F> for PoseidonBN128Hash {
     fn two_to_one(left: Self::Hash, right: Self::Hash) -> Self::Hash {
         compress::<F, Self::Permutation>(left, right)
     }
+}
+
+// TODO: this is a work around. Still use Goldilocks based Poseidon for algebraic PoseidonBN128Hash.
+impl<F: RichField> AlgebraicHasher<F> for PoseidonBN128Hash {
+    fn permute_swapped<const D: usize>(
+        inputs: [Target; SPONGE_WIDTH],
+        swap: BoolTarget,
+        builder: &mut CircuitBuilder<F, D>,
+    ) -> [Target; SPONGE_WIDTH]
+    where
+        F: RichField + Extendable<D>,
+    {
+        PoseidonHash::permute_swapped(inputs, swap, builder)
+    }
+    fn public_inputs_hash<const D: usize>(
+        inputs: Vec<Target>,
+        builder: &mut CircuitBuilder<F, D>,
+    ) -> HashOutTarget
+    where
+        F: RichField + Extendable<D>,
+    {
+        PoseidonHash::public_inputs_hash(inputs, builder)
+    }
+}
+
+/// Configuration using Poseidon over the Goldilocks field.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct PoseidonBN128GoldilocksConfig;
+
+impl GenericConfig<2> for PoseidonBN128GoldilocksConfig {
+    type F = GoldilocksField;
+    type FE = QuadraticExtension<Self::F>;
+    type Hasher = PoseidonBN128Hash;
+    type InnerHasher = PoseidonBN128Hash;
 }
 
 #[cfg(test)]
