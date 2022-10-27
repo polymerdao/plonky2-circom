@@ -12,7 +12,7 @@ describe("Verify Fri Proof Circuit Test", function () {
 
     before(async () => {
         // TODO: Error: Cannot create a string longer than 0x1fffffe8 characters
-        // circuit = await wasm_tester(path.join(__dirname, "circuits", "fri.test.circom"), {prime: "goldilocks"});
+        // circuit = await wasm_tester(path.join(__dirname, "circuits", "fri.test.circom"), {});
     });
 
     it("Should pass", async () => {

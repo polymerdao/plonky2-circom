@@ -8,7 +8,7 @@ describe("Poseidon Circuit Test", function () {
     this.timeout(10000000);
 
     before(async () => {
-        circuit = await wasm_tester(path.join(__dirname, "circuits", "poseidon.test.circom"), {prime: "goldilocks"});
+        circuit = await wasm_tester(path.join(__dirname, "circuits", "poseidon.test.circom"), {});
     });
 
     it("Should pass", async () => {
