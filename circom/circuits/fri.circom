@@ -12,7 +12,7 @@ template GetMerkleProofToCap(nLeaf, nProof) {
   signal output digest[4];
   signal output index;
 
-  component c_digest = HashNoPad(nLeaf, 4);
+  component c_digest = HashNoPad_BN(nLeaf, 4);
   for (var i = 0; i < nLeaf; i++) {
       c_digest.in[i] <== leaf[i];
   }

@@ -244,7 +244,7 @@ template Poseidon_BN(nOuts) {
     }
 }
 
-template HashNoPad(nInputs, nOutputs) {
+template HashNoPad_BN(nInputs, nOutputs) {
     signal input in[nInputs];
     signal input capacity[4];
     signal output out[nOutputs];
@@ -256,6 +256,60 @@ template HashNoPad(nInputs, nOutputs) {
 
     for (var i = 0; i < nHash; i++) {
         cPoseidon[i] = Poseidon_BN(12);
+    }
+    cPoseidon[0].capacity[0] <== capacity[0];
+    cPoseidon[0].capacity[1] <== capacity[1];
+    cPoseidon[0].capacity[2] <== capacity[2];
+    cPoseidon[0].capacity[3] <== capacity[3];
+
+    for (var i = 0; i < nHash; i++) {
+        for (var j = 0; j < 8; j++) {
+            var index = i * 8 + j;
+            if (index >= nInputs) {
+                if (i > 0) {
+                  cPoseidon[i].in[j] <== cPoseidon[i-1].out[j];
+                } else {
+                  cPoseidon[i].in[j] <== 0;
+                }
+            } else {
+                cPoseidon[i].in[j] <== in[index];
+            }
+        }
+        if (i > 0) {
+            cPoseidon[i].capacity[0] <== cPoseidon[i-1].out[8];
+            cPoseidon[i].capacity[1] <== cPoseidon[i-1].out[9];
+            cPoseidon[i].capacity[2] <== cPoseidon[i-1].out[10];
+            cPoseidon[i].capacity[3] <== cPoseidon[i-1].out[11];
+        }
+
+//        for (var j=0; j<8; j++) {
+//          log(i, cPoseidon[i].in[j]);
+//        }
+//        for (var j=0; j<4; j++) {
+//          log(i, cPoseidon[i].capacity[j]);
+//        }
+//        for (var j=0; j<12; j++) {
+//          log(i, cPoseidon[i].out[j]);
+//        }
+    }
+
+    for (var i = 0; i < nOutputs; i++) {
+        out[i] <== cPoseidon[nHash - 1].out[i];
+    }
+}
+
+template HashNoPad_GL(nInputs, nOutputs) {
+    signal input in[nInputs];
+    signal input capacity[4];
+    signal output out[nOutputs];
+    assert(nOutputs <= 12);
+
+    var nHash = (nInputs + 7) \ 8;
+    component cPoseidon[nHash];
+    component tmpHash[nHash][12];
+
+    for (var i = 0; i < nHash; i++) {
+        cPoseidon[i] = Poseidon_GL(12);
     }
     cPoseidon[0].capacity[0] <== capacity[0];
     cPoseidon[0].capacity[1] <== capacity[1];

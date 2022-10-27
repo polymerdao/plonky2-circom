@@ -9,7 +9,7 @@ template PoseidonTest() {
   in === 1;
   out <== 1;
 
-  component p = Poseidon_BN(4);
+  component p = Poseidon_GL(4);
   p.in[0] <== 168952236939078983;
   p.in[1] <== 18444491095334285830;
   p.in[2] <== 17812083740232784622;
@@ -30,7 +30,7 @@ template PoseidonTest() {
   p.out[2] === 4858661444170722461;
   p.out[3] === 8419634888969461752;
 
-  component h = HashNoPad(32, 4);
+  component h = HashNoPad_GL(32, 4);
   h.in[ 0] <== 9972144316416239374;
   h.in[ 1] <== 7195869958086994472;
   h.in[ 2] <== 12805395537960412263;
@@ -72,7 +72,7 @@ template PoseidonTest() {
   h.out[2] === 18237163116575285904;
   h.out[3] === 17017896878738047012;
 
-  component p2 = Poseidon_BN(12);
+  component p2 = Poseidon_GL(12);
   p2.in[0] <== 18174805707711129211;
   p2.in[1] <== 0;
   p2.in[2] <== 0;
