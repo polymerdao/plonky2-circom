@@ -37,7 +37,7 @@ template GetMerkleProofToCap(nLeaf, nProof) {
   signal tmp2[nProof];
   signal tmp3[nProof];
   for (var i = 0; i < nProof; i++) {
-    poseidon0[i] = Poseidon(4);
+    poseidon0[i] = Poseidon_BN(4);
     poseidon0[i].in[0] <== cur_digest[i][0];
     poseidon0[i].in[1] <== cur_digest[i][1];
     poseidon0[i].in[2] <== cur_digest[i][2];
@@ -51,7 +51,7 @@ template GetMerkleProofToCap(nLeaf, nProof) {
     poseidon0[i].capacity[2] <== 0;
     poseidon0[i].capacity[3] <== 0;
 
-    poseidon1[i] = Poseidon(4);
+    poseidon1[i] = Poseidon_BN(4);
     poseidon1[i].in[0] <== proof[i][0];
     poseidon1[i].in[1] <== proof[i][1];
     poseidon1[i].in[2] <== proof[i][2];

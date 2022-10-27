@@ -1,7 +1,9 @@
 pragma circom 2.0.6;
 include "./goldilocks.circom";
+include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
 
-template MDS() {
+template MDS_GL() {
     signal input in[12];
     signal output out[12];
 
@@ -19,7 +21,7 @@ template MDS() {
     out[11] <== 15*in[0] + 41*in[1] + 16*in[2] +  2*in[3] + 28*in[4] + 13*in[5] + 13*in[6] + 39*in[7] + 18*in[8] + 34*in[9] + 20*in[10] + 17*in[11];
 }
 
-template Poseidon(nOuts) {
+template Poseidon_GL(nOuts) {
     signal input in[8];
     signal input capacity[4];
     signal output out[nOuts];
@@ -140,7 +142,7 @@ template Poseidon(nOuts) {
     }
 
     for (var i=0; i<4; i++) {
-        mds[i] = MDS();
+        mds[i] = MDS_GL();
         for (var j=0; j<12; j++) {
             var c = const[i*12+j];
             f1_x2[i][j] <== (state[i][j] + c) * (state[i][j] + c);
@@ -155,7 +157,7 @@ template Poseidon(nOuts) {
 
     for (var i=0; i<22; i++) {
         var c = const[(4+i)*12];
-        mds[4+i] = MDS();
+        mds[4+i] = MDS_GL();
         p_x2[i] <== (state[4+i][0]+c) * (state[4+i][0]+c);
         p_x4[i] <== p_x2[i] * p_x2[i];
         p_x6[i] <== p_x2[i] * p_x4[i];
@@ -172,7 +174,7 @@ template Poseidon(nOuts) {
 
 
     for (var i=0; i<4; i++) {
-        mds[26+i] = MDS();
+        mds[26+i] = MDS_GL();
         for (var j=0; j<12; j++) {
             var c = const[(26+i)*12+j];
             f2_x2[i][j] <== (state[26+i][j]+c) * (state[26+i][j]+c);
@@ -191,6 +193,40 @@ template Poseidon(nOuts) {
 
 }
 
+template Poseidon_BN(nOuts) {
+    signal input in[8];
+    signal input capacity[4];
+    signal output out[nOuts];
+
+    assert(nOuts <= 12);
+    component pEx = PoseidonEx(4, 4);
+    pEx.initialState <== 0;
+    pEx.inputs[0] <== in[0] * 2 ** 128 + in[1] * 2 ** 64 + in[2];
+    pEx.inputs[1] <== in[3] * 2 ** 128 + in[4] * 2 ** 64 + in[5];
+    pEx.inputs[2] <== in[6] * 2 ** 128 + in[7] * 2 ** 64 + capacity[0];
+    pEx.inputs[3] <== capacity[1] * 2 ** 128 + capacity[2] * 2 ** 64 + capacity[3];
+
+    component nBits[4];
+    signal gl_hashes[12][64];
+    var e2;
+    for (var i = 0; i < 4; i++) {
+      nBits[i] = Num2Bits(254);
+      nBits[i].in <== pEx.out[i];
+      for (var j = 0; j < 3; j++) {
+        gl_hashes[i * 3 + j][0] <== nBits[i].out[(2 - j) * 64];
+        e2 = 2;
+        for (var k = 1; k < 64; k++) {
+          gl_hashes[i * 3 + j][k] <== gl_hashes[i * 3 + j][k - 1] + nBits[i].out[(2 - j) * 64 + j] * e2;
+          e2 = e2 + e2;
+        }
+      }
+    }
+
+    for (var i = 0; i < nOuts; i++) {
+      out[i] <== gl_hashes[i][63];
+    }
+}
+
 template HashNoPad(nInputs, nOutputs) {
     signal input in[nInputs];
     signal input capacity[4];
@@ -202,7 +238,7 @@ template HashNoPad(nInputs, nOutputs) {
     component tmpHash[nHash][12];
 
     for (var i = 0; i < nHash; i++) {
-        cPoseidon[i] = Poseidon(12);
+        cPoseidon[i] = Poseidon_BN(12);
     }
     cPoseidon[0].capacity[0] <== capacity[0];
     cPoseidon[0].capacity[1] <== capacity[1];

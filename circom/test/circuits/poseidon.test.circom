@@ -9,7 +9,7 @@ template PoseidonTest() {
   in === 1;
   out <== 1;
 
-  component p = Poseidon(4);
+  component p = Poseidon_BN(4);
   p.in[0] <== 168952236939078983;
   p.in[1] <== 18444491095334285830;
   p.in[2] <== 17812083740232784622;
@@ -72,7 +72,7 @@ template PoseidonTest() {
   h.out[2] === 18237163116575285904;
   h.out[3] === 17017896878738047012;
 
-  component p2 = Poseidon(12);
+  component p2 = Poseidon_BN(12);
   p2.in[0] <== 18174805707711129211;
   p2.in[1] <== 0;
   p2.in[2] <== 0;
