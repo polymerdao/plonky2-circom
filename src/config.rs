@@ -1,13 +1,6 @@
-use std::mem::size_of;
-
-extern crate ff;
-use ff::*;
-use num::bigint::BigUint;
-use num::ToPrimitive;
 use plonky2::field::extension::quadratic::QuadraticExtension;
 use plonky2::field::extension::Extendable;
 use plonky2::field::goldilocks_field::GoldilocksField;
-use poseidon_rs::{Fr, Poseidon};
 
 use plonky2::hash::hash_types::{HashOut, HashOutTarget, RichField};
 use plonky2::hash::hashing::{compress, hash_n_to_hash_no_pad, PlonkyPermutation, SPONGE_WIDTH};
@@ -15,49 +8,42 @@ use plonky2::hash::poseidon::PoseidonHash;
 use plonky2::iop::target::{BoolTarget, Target};
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2::plonk::config::{AlgebraicHasher, GenericConfig, Hasher};
+use poseidon_permutation::bindings::permute;
 
 pub struct PoseidonBN128Permutation;
 impl<F: RichField> PlonkyPermutation<F> for PoseidonBN128Permutation {
     fn permute(input: [F; SPONGE_WIDTH]) -> [F; SPONGE_WIDTH] {
         assert_eq!(SPONGE_WIDTH, 12);
-
-        let mut state = vec![0u8; SPONGE_WIDTH * size_of::<u64>()];
-        for i in 0..SPONGE_WIDTH {
-            // println!("{}", input[i].to_canonical_biguint().to_str_radix(16));
-            state[i * size_of::<u64>()..(i + 1) * size_of::<u64>()]
-                .copy_from_slice(&input[i].to_canonical_u64().to_be_bytes());
-        }
-
-        const WIDTH: usize = 4;
-        const NUM_GL_ELEM: usize = SPONGE_WIDTH / WIDTH;
-        let mut arr = [Fr::zero(); WIDTH];
-        for i in 0..WIDTH {
-            let bi = BigUint::from_bytes_be(
-                &state
-                    [i * NUM_GL_ELEM * size_of::<u64>()..(i + 1) * NUM_GL_ELEM * size_of::<u64>()],
+        unsafe {
+            let h = permute(
+                input[0].to_canonical_u64(),
+                input[1].to_canonical_u64(),
+                input[2].to_canonical_u64(),
+                input[3].to_canonical_u64(),
+                input[4].to_canonical_u64(),
+                input[5].to_canonical_u64(),
+                input[6].to_canonical_u64(),
+                input[7].to_canonical_u64(),
+                input[8].to_canonical_u64(),
+                input[9].to_canonical_u64(),
+                input[10].to_canonical_u64(),
+                input[11].to_canonical_u64(),
             );
-            // println!("{}", bi.to_str_radix(16));
-            arr[i] = Fr::from_str(&bi.to_str_radix(10)).unwrap();
-            // println!("{}", arr[i].to_string())
+            [
+                F::from_canonical_u64(h.r0),
+                F::from_canonical_u64(h.r1),
+                F::from_canonical_u64(h.r2),
+                F::from_canonical_u64(h.r3),
+                F::from_canonical_u64(h.r4),
+                F::from_canonical_u64(h.r5),
+                F::from_canonical_u64(h.r6),
+                F::from_canonical_u64(h.r7),
+                F::from_canonical_u64(h.r8),
+                F::from_canonical_u64(h.r9),
+                F::from_canonical_u64(h.r10),
+                F::from_canonical_u64(h.r11),
+            ]
         }
-        let poseidon = Poseidon::new();
-        let h = poseidon.permute(arr.clone());
-        let mut res = [F::ZERO; SPONGE_WIDTH];
-        for i in 0..WIDTH {
-            let gls = h[i].to_string();
-            // println!("{}", gls);
-            for j in 0..NUM_GL_ELEM {
-                let gl = u64::from_str_radix(
-                    &gls[5 + 2 * size_of::<u64>() + j * 2 * size_of::<u64>()
-                        ..5 + 2 * size_of::<u64>() + (j + 1) * 2 * size_of::<u64>()],
-                    16,
-                )
-                .unwrap();
-                res[i * NUM_GL_ELEM + j] = F::from_canonical_u64(gl % F::order().to_u64().unwrap());
-                // println!("{}", res[i * NUM_GL_ELEM + j].to_canonical_biguint().to_str_radix(16));
-            }
-        }
-        res
     }
 }
 

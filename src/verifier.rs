@@ -640,6 +640,7 @@ pub fn generate_proof_base64<
 
     let proof_bytes = pwpi.to_bytes()?;
     assert_eq!(proof_bytes.len(), proof_size);
+    println!("proof size: {}", proof_size);
 
     Ok(serde_json::to_string(&circom_proof).unwrap())
 }

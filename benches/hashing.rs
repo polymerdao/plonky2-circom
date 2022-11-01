@@ -3,7 +3,7 @@ use plonky2::field::goldilocks_field::GoldilocksField;
 use plonky2::hash::hash_types::RichField;
 use plonky2::hash::hashing::PlonkyPermutation;
 use plonky2::hash::hashing::SPONGE_WIDTH;
-use plonky2::hash::poseidon::{PoseidonPermutation};
+use plonky2::hash::poseidon::PoseidonPermutation;
 use plonky2_circom_verifier::config::PoseidonBN128Permutation;
 use std::any::type_name;
 
