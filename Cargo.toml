@@ -22,6 +22,13 @@ poseidon-rs = { path = "../poseidon-rs" }
 num = { version = "0.4", features = [ "rand" ] }
 ff = { package="ff_ce" , version="0.11", features = ["derive"] }
 
+[dev-dependencies]
+criterion = "0.4.0"
+
+[[bench]]
+name = "hashing"
+harness = false
+
 [profile.release]
 opt-level = 3
 
