@@ -1,5 +1,8 @@
-CIRCUIT_NAME=e2e
+CIRCUIT_NAME=plonky2
+CIRCUIT_PATH=../circuits/plonky2.circom
+INPUT_PATH=../test/data/proof.json
 POT_PATH=~/Downloads/powersOfTau28_hez_final_24.ptau
+#POT_PATH=~/Downloads/powersOfTau28_hez_final_17.ptau
 RAPIDSNARK_PATH=../../../rapidsnark/build/prover
 NODE_PATH=~/node/out/Release/node
 SNARKJS_PATH=../../../../snarkjs/cli.js
@@ -7,13 +10,17 @@ NODE_PARAMS="--trace-gc --trace-gc-ignore-scavenger --max-old-space-size=2048000
 
 echo "****COMPILING CIRCUIT****"
 start=$(date +%s)
-circom ./${CIRCUIT_NAME}.circom --r1cs --wasm --sym
+circom ${CIRCUIT_PATH} --r1cs --sym --c
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
+#${NODE_PATH} ./${CIRCUIT_NAME}_js/generate_witness.js ./${CIRCUIT_NAME}_js/${CIRCUIT_NAME}.wasm ${INPUT_PATH} ./witness.wtns
+cd ${CIRCUIT_NAME}_cpp
+make -j
+cd ..
 echo "****WITNESS GENERATION****"
 start=$(date +%s)
-${NODE_PATH} ./${CIRCUIT_NAME}_js/generate_witness.js ./${CIRCUIT_NAME}_js/${CIRCUIT_NAME}.wasm ./input.json ./witness.wtns
+./${CIRCUIT_NAME}_cpp/${CIRCUIT_NAME} ${INPUT_PATH} ./witness.wtns
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
@@ -38,6 +45,7 @@ end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
 echo "****VERIFYING PROOF****"
+# If failed: double check the i/o of the circuits
 start=$(date +%s)
 ${NODE_PATH} ${SNARKJS_PATH} groth16 verify verification_key.json public.json proof.json
 end=$(date +%s)
@@ -45,3 +53,4 @@ echo "DONE ($((end - start))s)"
 
 ${NODE_PATH} ${SNARKJS_PATH} zkey export solidityverifier circuit_0000.zkey verifier.sol
 ${NODE_PATH} ${SNARKJS_PATH} generatecall public.json
+cp verifier.sol ./hardhat/contracts
