@@ -207,7 +207,6 @@ template VerifyFriProof() {
   signal input fri_query_step1_v[NUM_FRI_QUERY_ROUND()][NUM_FRI_QUERY_STEP1_V()][2];
   signal input fri_query_step1_p[NUM_FRI_QUERY_ROUND()][NUM_FRI_QUERY_STEP1_P()][4];
   signal input fri_final_poly_ext_v[NUM_FRI_FINAL_POLY_EXT_V()][2];
-  signal input fri_pow_witness;
 
   // Challenges
   signal input plonk_zeta[2];
