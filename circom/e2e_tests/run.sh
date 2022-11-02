@@ -2,7 +2,6 @@ CIRCUIT_NAME=plonky2
 CIRCUIT_PATH=../circuits/plonky2.circom
 INPUT_PATH=../test/data/proof.json
 POT_PATH=~/Downloads/powersOfTau28_hez_final_24.ptau
-#POT_PATH=~/Downloads/powersOfTau28_hez_final_17.ptau
 RAPIDSNARK_PATH=../../../rapidsnark/build/prover
 NODE_PATH=~/node/out/Release/node
 SNARKJS_PATH=../../../../snarkjs/cli.js
@@ -14,13 +13,11 @@ circom ${CIRCUIT_PATH} --r1cs --sym --c
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
-#${NODE_PATH} ./${CIRCUIT_NAME}_js/generate_witness.js ./${CIRCUIT_NAME}_js/${CIRCUIT_NAME}.wasm ${INPUT_PATH} ./witness.wtns
+echo "****COMPILING WITNESS GENERATOR****"
+start=$(date +%s)
 cd ${CIRCUIT_NAME}_cpp
 make -j
 cd ..
-echo "****WITNESS GENERATION****"
-start=$(date +%s)
-./${CIRCUIT_NAME}_cpp/${CIRCUIT_NAME} ${INPUT_PATH} ./witness.wtns
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
@@ -31,16 +28,23 @@ ${NODE_PATH} ${NODE_PARAMS} ${SNARKJS_PATH} groth16 setup $CIRCUIT_NAME.r1cs ${P
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
+echo "****EXPORTING VKEY****"
+start=$(date +%s)
+${NODE_PATH} ${SNARKJS_PATH} zkey export verificationkey circuit_0000.zkey verification_key.json
+end=$(date +%s)
+echo "DONE ($((end - start))s)"
+
+echo "****WITNESS GENERATION****"
+start=$(date +%s)
+#${NODE_PATH} ./${CIRCUIT_NAME}_js/generate_witness.js ./${CIRCUIT_NAME}_js/${CIRCUIT_NAME}.wasm ${INPUT_PATH} ./witness.wtns
+./${CIRCUIT_NAME}_cpp/${CIRCUIT_NAME} ${INPUT_PATH} ./witness.wtns
+end=$(date +%s)
+echo "DONE ($((end - start))s)"
+
 echo "****GENERATING PROOF****"
 start=$(date +%s)
 ${RAPIDSNARK_PATH} circuit_0000.zkey ./witness.wtns proof.json public.json
 #${NODE_PATH} ${SNARKJS_PATH} groth16 prove circuit_0000.zkey ./witness.wtns proof.json public.json
-end=$(date +%s)
-echo "DONE ($((end - start))s)"
-
-echo "****EXPORTING VKEY****"
-start=$(date +%s)
-${NODE_PATH} ${SNARKJS_PATH} zkey export verificationkey circuit_0000.zkey verification_key.json
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
