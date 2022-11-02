@@ -37,10 +37,11 @@ ${NODE_PATH} ${SNARKJS_PATH} zkey export verificationkey circuit_0000.zkey verif
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
-echo "****VERIFYING PROOF FOR SAMPLE INPUT****"
+echo "****VERIFYING PROOF****"
 start=$(date +%s)
 ${NODE_PATH} ${SNARKJS_PATH} groth16 verify verification_key.json public.json proof.json
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
-#${NODE_PATH} ${SNARKJS_PATH} zkey export solidityverifier circuit_0000.zkey verifier.sol
+${NODE_PATH} ${SNARKJS_PATH} zkey export solidityverifier circuit_0000.zkey verifier.sol
+${NODE_PATH} ${SNARKJS_PATH} generatecall public.json

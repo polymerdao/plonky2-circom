@@ -220,10 +220,6 @@ template VerifyFriProof() {
   component check = LessNBits(64 - MIN_FRI_POW_RESPONSE());
   check.x <== fri_pow_response;
 
-  // TODO: remove out
-  signal output out;
-  out <== 1;
-
   component c_gl_mul[NUM_FRI_QUERY_ROUND()][1];
   component c_gl_exp[NUM_FRI_QUERY_ROUND()][1];
   component c_mul[NUM_FRI_QUERY_ROUND()][2];
