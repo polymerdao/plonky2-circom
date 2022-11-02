@@ -12,7 +12,7 @@ describe("Verify Fri Proof Circuit Test", function () {
 
     before(async () => {
         // TODO: Error: Cannot create a string longer than 0x1fffffe8 characters
-        // circuit = await wasm_tester(path.join(__dirname, "circuits", "fri.test.circom"), {});
+        circuit = await wasm_tester(path.join(__dirname, "circuits", "fri.test.circom"), {});
     });
 
     it("Should pass", async () => {
@@ -43,7 +43,6 @@ describe("Verify Fri Proof Circuit Test", function () {
             fri_query_step1_v: proof.fri_query_step1_v,
             fri_query_step1_p: proof.fri_query_step1_p,
             fri_final_poly_ext_v: proof.fri_final_poly_ext_v,
-            fri_pow_witness: proof.fri_pow_witness,
 
             plonk_zeta: challenges.plonk_zeta,
             fri_alpha: challenges.fri_alpha,
@@ -54,8 +53,8 @@ describe("Verify Fri Proof Circuit Test", function () {
 
         fs.writeFileSync('fri_input.json', JSON.stringify(input));
 
-        // const w = await circuit.calculateWitness(input, true);
+        const w = await circuit.calculateWitness(input, true);
 
-        // await circuit.assertOut(w, {out: 1});
+        await circuit.assertOut(w, {});
     });
 });
