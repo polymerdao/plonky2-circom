@@ -67,6 +67,8 @@ ${NODE_PATH} ${SNARKJS_PATH} groth16 verify verification_key.json public.json pr
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
+echo "****SOLIDITY VERIFIER TEST****"
 ${NODE_PATH} ${SNARKJS_PATH} zkey export solidityverifier "$CIRCUIT_NAME".zkey verifier.sol
-${NODE_PATH} ${SNARKJS_PATH} generatecall public.json
+${NODE_PATH} ${SNARKJS_PATH} generatecall public.json > ./hardhat/test/public.txt
 cp verifier.sol ./hardhat/contracts
+cd hardhat && npx hardhat test && cd ..
