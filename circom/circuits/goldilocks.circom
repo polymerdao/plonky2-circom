@@ -28,7 +28,6 @@ template GlReduce(N) {
   var d = (x - r) \ Order();
   out <-- r;
   signal tmp0 <-- d;
-  signal order <== Order();
   tmp0 * Order() + out === x;
 
   component c0 = LessNBits(N);
@@ -68,6 +67,7 @@ template GlMul() {
 }
 
 function gl_inverse(x) {
+  assert(x != 0);
   var m = Order() - 2;
   var e2 = x;
   var res = 1;
@@ -85,13 +85,10 @@ function gl_inverse(x) {
 template GlInv() {
   signal input x;
   signal output out;
-
-  component cr = GlReduce(64);
-  cr.x <-- gl_inverse(x);
-  out <== cr.out;
-  signal tmp1 <== out * x - 1;
-  signal tmp2 <== tmp1 \ Order();
-  tmp1 === tmp2 * Order();
+  out <-- gl_inverse(x);
+  component check = GlMul();
+  check.a <== x;
+  check.b <== out;
 }
 
 template GlDiv() {
