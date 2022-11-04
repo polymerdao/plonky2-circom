@@ -34,9 +34,9 @@ ${NODE_PATH} ${NODE_PARAMS} ${SNARKJS_PATH} zkey contribute -verbose "$CIRCUIT_N
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
-echo "****VERIFYING FINAL ZKEY****"
+echo "****VERIFYING FINAL ZKEY (SKIP FOR TESTING)****"
 start=$(date +%s)
-${NODE_PATH} ${NODE_PARAMS} ${SNARKJS_PATH} zkey verify -verbose "$CIRCUIT_NAME".r1cs ${POT_PATH} "$CIRCUIT_NAME".zkey > verify.out
+#${NODE_PATH} ${NODE_PARAMS} ${SNARKJS_PATH} zkey verify -verbose "$CIRCUIT_NAME".r1cs ${POT_PATH} "$CIRCUIT_NAME".zkey > verify.out
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
@@ -47,6 +47,7 @@ end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
 echo "****WITNESS GENERATION****"
+# If failed: check if there is any empty components and/or i/o
 start=$(date +%s)
 ./${CIRCUIT_NAME}_cpp/${CIRCUIT_NAME} ${INPUT_PATH} ./witness.wtns
 end=$(date +%s)
