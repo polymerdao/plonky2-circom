@@ -79,3 +79,11 @@ function SPONGE_CAPACITY() { return 4; }
 function SPONGE_WIDTH() { return 12; }
 function DEGREE_BITS() { return $DEGREE_BITS; }
 function FRI_RATE_BITS() { return $FRI_RATE_BITS; }
+function NUM_GATE_CONSTRAINTS() { return $NUM_GATE_CONSTRAINTS; }
+function NUM_PARTIAL_PRODUCTS_TERMS() { return NUM_OPENINGS_PLONK_SIGMAS() \ QUOTIENT_DEGREE_FACTOR() + 1; }
+function QUOTIENT_DEGREE_FACTOR() { return $QUOTIENT_DEGREE_FACTOR; }
+function K_IS(i) {
+  var k_is[$NUM_OPENINGS_PLONK_SIGMAS];
+  $SET_K_IS;
+  return k_is[i];
+}

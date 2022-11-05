@@ -665,13 +665,13 @@ pub fn generate_circom_verifier<
     let k_is = &common.k_is;
     let mut k_is_str = "".to_owned();
     for i in 0..k_is.len() {
-        k_is_str += &*("        k_is[".to_owned()
+        k_is_str += &*("  k_is[".to_owned()
             + &*i.to_string()
             + "] = "
             + &*k_is[i].to_canonical_u64().to_string()
             + ";\n");
     }
-    constants = constants.replace("        $SET_K_IS;\n", &*k_is_str);
+    constants = constants.replace("  $SET_K_IS;\n", &*k_is_str);
 
     let reduction_arity_bits = &common.fri_params.reduction_arity_bits;
     let mut reduction_arity_bits_str = "".to_owned();

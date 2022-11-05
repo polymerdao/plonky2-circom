@@ -61,7 +61,6 @@ end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
 echo "****VERIFYING PROOF****"
-# If failed: double check the i/o of the circuits
 start=$(date +%s)
 ${NODE_PATH} ${SNARKJS_PATH} groth16 verify verification_key.json public.json proof.json -v
 end=$(date +%s)
