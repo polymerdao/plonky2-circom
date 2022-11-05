@@ -87,38 +87,6 @@ template GetMerkleProofToCap(nLeaf, nProof) {
   index <== shift[nProof - 1].out;
 }
 
-template Reduce(N) {
-  signal input in[N][2];
-  signal input alpha[2];
-  signal input old_eval[2];
-  signal output out[2];
-
-  component add[N];
-  component mul[N];
-
-  for (var i = N; i > 0; i--) {
-    add[i - 1] = GlExtAdd();
-    mul[i - 1] = GlExtMul();
-    if (i == N) {
-      mul[i - 1].a[0] <== old_eval[0];
-      mul[i - 1].a[1] <== old_eval[1];
-    } else {
-      mul[i - 1].a[0] <== add[i].out[0];
-      mul[i - 1].a[1] <== add[i].out[1];
-    }
-    mul[i - 1].b[0] <== alpha[0];
-    mul[i - 1].b[1] <== alpha[1];
-
-    add[i - 1].a[0] <== in[i - 1][0];
-    add[i - 1].a[1] <== in[i - 1][1];
-    add[i - 1].b[0] <== mul[i - 1].out[0];
-    add[i - 1].b[1] <== mul[i - 1].out[1];
-  }
-
-  out[0] <== add[0].out[0];
-  out[1] <== add[0].out[1];
-}
-
 template CalBarycentricWeights(arity) {
   signal input points[arity];
   signal output out[arity];
