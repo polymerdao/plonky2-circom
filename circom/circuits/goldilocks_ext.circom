@@ -1,4 +1,4 @@
-pragma circom 2.0.9;
+pragma circom 2.1.0;
 include "./constants.circom";
 include "./goldilocks.circom";
 
@@ -174,4 +174,19 @@ template GlExtExp() {
 
   out[0] <== cextmul[63].out[0];
   out[1] <== cextmul[63].out[1];
+}
+
+template GlExtExpPowerOf2(N) {
+  signal input x[2];
+  signal output out[2];
+  component mul[N];
+  mul[0] = GlExtMul();
+  mul[0].a <== x;
+  mul[0].b <== x;
+  for (var i = 1; i < N; i++) {
+    mul[i] = GlExtMul();
+    mul[i].a <== mul[i - 1].out;
+    mul[i].b <== mul[i - 1].out;
+  }
+  out <== mul[N - 1].out;
 }
