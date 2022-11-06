@@ -190,3 +190,11 @@ template GlExtExpPowerOf2(N) {
   }
   out <== mul[N - 1].out;
 }
+
+template GlExtScalarMul() {
+  signal input x[2];
+  signal input a;
+  signal output out[2];
+  out[0] <== GlMul()(x[0], a);
+  out[1] <== GlMul()(x[1], a);
+}

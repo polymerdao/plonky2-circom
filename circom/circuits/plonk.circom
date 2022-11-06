@@ -31,10 +31,19 @@ template EvalL1() {
 }
 
 template EvalGateConstraints() {
+
 }
 
 template EvalVanishingPoly() {
+  signal input plonk_betas[NUM_CHALLENGES()];
   signal input plonk_zeta[2];
+  signal input plonk_gammas[NUM_CHALLENGES()];
+  signal input openings_wires[NUM_OPENINGS_WIRES()][2];
+  signal input openings_plonk_zs[NUM_OPENINGS_PLONK_ZS()][2];
+  signal input openings_plonk_sigmas[NUM_OPENINGS_PLONK_SIGMAS()][2];
+  signal input openings_plonk_zs_next[NUM_OPENINGS_PLONK_ZS_NEXT()][2];
+  signal input openings_partial_products[NUM_OPENINGS_PARTIAL_PRODUCTS()][2];
+
   signal output constraint_terms[NUM_GATE_CONSTRAINTS()][2];
   signal output vanishing_partial_products_terms[NUM_PARTIAL_PRODUCTS_TERMS() * NUM_CHALLENGES()][2];
   signal output vanishing_z_1_terms[NUM_CHALLENGES()][2];
@@ -42,8 +51,53 @@ template EvalVanishingPoly() {
   signal one[2];
   one[0] <== 1;
   one[1] <== 0;
+
+  signal numerator_values[NUM_CHALLENGES()][NUM_OPENINGS_PLONK_SIGMAS()][2][2];
+  signal denominator_values[NUM_CHALLENGES()][NUM_OPENINGS_PLONK_SIGMAS()][2][2];
+  signal accs[NUM_CHALLENGES()][NUM_PARTIAL_PRODUCTS_TERMS() + 1][2];
+  signal numerator_prod[NUM_CHALLENGES()][NUM_PARTIAL_PRODUCTS_TERMS()][QUOTIENT_DEGREE_FACTOR()][2];
+  signal denominator_prod[NUM_CHALLENGES()][NUM_PARTIAL_PRODUCTS_TERMS()][QUOTIENT_DEGREE_FACTOR()][2];
+
+  assert(NUM_PARTIAL_PRODUCTS_TERMS() == NUM_OPENINGS_PARTIAL_PRODUCTS() \ NUM_CHALLENGES() + 1);
   for (var i = 0; i < NUM_CHALLENGES(); i++) {
     vanishing_z_1_terms[i] <== GlExtMul()(l1_x, GlExtSub()(plonk_zeta, one));
+    for (var j = 0; j < NUM_OPENINGS_PLONK_SIGMAS(); j ++) {
+      numerator_values[i][j][0] <== GlExtAdd()(openings_wires[j], GlExtScalarMul()(plonk_zeta, K_IS(j)));
+      numerator_values[i][j][1][0] <== GlAdd()(numerator_values[i][j][0][0], plonk_gammas[i]);
+      numerator_values[i][j][1][1] <== numerator_values[i][j][0][1];
+
+      denominator_values[i][j][0] <== GlExtAdd()(openings_wires[j], GlExtScalarMul()(openings_plonk_sigmas[j], plonk_betas[i]));
+      denominator_values[i][j][1][0] <== GlAdd()(denominator_values[i][j][0][0], plonk_gammas[i]);
+      denominator_values[i][j][1][1] <== numerator_values[i][j][0][1];
+    }
+    accs[i][0] <== openings_plonk_zs[i];
+    accs[i][NUM_PARTIAL_PRODUCTS_TERMS()] <== openings_plonk_zs_next[i];
+    for (var j = 1; j < NUM_OPENINGS_PARTIAL_PRODUCTS() \ NUM_CHALLENGES() + 1; j++) {
+      accs[i][j] <== openings_partial_products[i * (NUM_OPENINGS_PARTIAL_PRODUCTS() \ NUM_CHALLENGES()) + j - 1];
+    }
+    var pos = 0;
+    for (var j = 0; j < NUM_PARTIAL_PRODUCTS_TERMS(); j++) {
+      numerator_prod[i][j][0] <== numerator_values[i][pos][1];
+      denominator_prod[i][j][0] <== denominator_values[i][pos][1];
+      pos++;
+      var last_k = 0;
+      for (var k = 1; k < QUOTIENT_DEGREE_FACTOR() && pos < NUM_OPENINGS_PLONK_SIGMAS(); k++) {
+        numerator_prod[i][j][k] <== GlExtMul()(numerator_prod[i][j][k - 1], numerator_values[i][pos][1]);
+        denominator_prod[i][j][k] <== GlExtMul()(denominator_prod[i][j][k - 1], denominator_values[i][pos][1]);
+        last_k = k;
+        pos++;
+      }
+      for (var k = last_k + 1; k < QUOTIENT_DEGREE_FACTOR(); k++) {
+        numerator_prod[i][j][k][0] <== 0;
+        numerator_prod[i][j][k][1] <== 0;
+        denominator_prod[i][j][k][0] <== 0;
+        denominator_prod[i][j][k][1] <== 0;
+      }
+      vanishing_partial_products_terms[NUM_PARTIAL_PRODUCTS_TERMS() * i + j] <== GlExtSub()(
+          GlExtMul()(accs[i][j], numerator_prod[i][j][last_k]),
+          GlExtMul()(accs[i][j + 1], denominator_prod[i][j][last_k])
+        );
+    }
   }
 }
 
