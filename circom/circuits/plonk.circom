@@ -162,7 +162,8 @@ template CheckZeta() {
     c_reduce_with_powers[i].old_eval[1] <== 0;
     c_reduce_with_powers[i].alpha <== zeta_pow_deg;
     for (var j = 0; j < QUOTIENT_DEGREE_FACTOR(); j++) {
-      c_reduce_with_powers[i].in[j] <== openings_quotient_polys[i * QUOTIENT_DEGREE_FACTOR() + j];
+      c_reduce_with_powers[i].in[j][0] <== openings_quotient_polys[i * QUOTIENT_DEGREE_FACTOR() + j][0];
+      c_reduce_with_powers[i].in[j][1] <== openings_quotient_polys[i * QUOTIENT_DEGREE_FACTOR() + j][1];
     }
     zeta[i] <== GlExtMul()(z_h_zeta, c_reduce_with_powers[i].out);
 
