@@ -59,7 +59,7 @@ impl<F: RichField> Hasher<F> for PoseidonBN128Hash {
     }
 
     fn hash_public_inputs(input: &[F]) -> Self::Hash {
-        PoseidonBN128Hash::hash_no_pad(input)
+        PoseidonHash::hash_no_pad(input)
     }
 
     fn two_to_one(left: Self::Hash, right: Self::Hash) -> Self::Hash {

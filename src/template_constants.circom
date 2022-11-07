@@ -87,3 +87,4 @@ function K_IS(i) {
   $SET_K_IS;
   return k_is[i];
 }
+function NUM_PUBLIC_INPUTS() { return $NUM_PUBLIC_INPUTS; }

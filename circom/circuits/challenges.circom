@@ -18,13 +18,7 @@ template GetChallenges() {
   signal input fri_commit_phase_merkle_caps[NUM_FRI_COMMIT_ROUND()][FRI_COMMIT_MERKLE_CAP_HEIGHT()][4];
   signal input fri_final_poly_ext_v[NUM_FRI_FINAL_POLY_EXT_V()][2];
   signal input fri_pow_witness;
-
-  // TODO: todo
-  signal public_input_hash[4];
-  public_input_hash[0] <== 0;
-  public_input_hash[1] <== 0;
-  public_input_hash[2] <== 0;
-  public_input_hash[3] <== 0;
+  signal input public_input_hash[4];
 
   signal output plonk_betas[NUM_CHALLENGES()];
   signal output plonk_gammas[NUM_CHALLENGES()];
