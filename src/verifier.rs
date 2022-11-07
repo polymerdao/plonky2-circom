@@ -862,87 +862,95 @@ pub fn generate_circom_verifier<
 
     let num_selectors = common.selectors_info.num_selectors();
     constants = constants.replace("$NUM_SELECTORS", &num_selectors.to_string());
-    // let mut evaluate_gate_constraints_str = "".to_owned();
-    // for (row, gate) in common.gates.iter().enumerate() {
-    //     if gate.0.id().eq("NoopGate") {
-    //         continue;
-    //     }
-    //     let selector_index = common.selectors_info.selector_indices[row];
-    //     let group_range = common.selectors_info.groups[selector_index].clone();
-    //     let mut c = 0;
-    //
-    //     evaluate_gate_constraints_str = evaluate_gate_constraints_str + "        {\n";
-    //     let mut filter_str = "ev.filter = ".to_owned();
-    //     let filter_chain = group_range
-    //         .filter(|&i| i != row)
-    //         .chain((num_selectors > 1).then_some(u32::MAX as usize));
-    //     for i in filter_chain {
-    //         filter_str += &*("GatesUtilsLib.field_ext_from(".to_owned()
-    //             + &i.to_string()
-    //             + ", 0).sub("
-    //             + "ev.constants["
-    //             + &*selector_index.to_string()
-    //             + "]).mul(");
-    //         c = c + 1;
-    //     }
-    //     filter_str = filter_str[0..filter_str.len() - 5].parse()?;
-    //     for _ in 0..c - 1 {
-    //         filter_str = filter_str + ")";
-    //     }
-    //     filter_str = filter_str + ";";
-    //
-    //     // vars:
-    //     //   proof.openings_constants
-    //     //   proof.openings_wires
-    //     //   challenges.public_input_hash
-    //     // local_constants = local_constants[num_selectors..];
-    //     let mut eval_str = "            // ".to_owned() + &*gate.0.id() + "\n";
-    //     let gate_name = gate.0.id();
-    //     if gate_name.eq("PublicInputGate")
-    //         || gate_name[0..11].eq("BaseSumGate")
-    //         || gate_name[0..12].eq("ConstantGate")
-    //         || gate_name[0..12].eq("ReducingGate")
-    //         || gate_name[0..14].eq("ArithmeticGate")
-    //         || gate_name[0..16].eq("MulExtensionGate")
-    //         || gate_name[0..16].eq("RandomAccessGate")
-    //         || gate_name[0..17].eq("U32ArithmeticGate")
-    //         || gate_name[0..18].eq("ExponentiationGate")
-    //         || gate_name[0..21].eq("ReducingExtensionGate")
-    //         || gate_name[0..23].eq("ArithmeticExtensionGate")
-    //         || gate_name[0..26].eq("LowDegreeInterpolationGate")
-    //     {
-    //         //TODO: use num_coeff as a param (same TODO for other gates)
-    //         let mut code_str = gate.0.export_solidity_verification_code();
-    //         code_str = code_str.replace("$SET_FILTER;", &*filter_str);
-    //         let v: Vec<&str> = code_str.split(' ').collect();
-    //         let lib_name = v[1];
-    //         eval_str += &*("            ".to_owned() + lib_name + ".set_filter(ev); \n");
-    //         eval_str +=
-    //             &*("            ".to_owned() + lib_name + ".eval(ev, vm.constraint_terms); \n");
-    //         gates_lib += &*(code_str + "\n");
-    //         // eval_str += &*format!("            console.log(\"{}\");", gate_name);
-    //         // eval_str += &*format!(
-    //         //     "
-    //         // for (uint32 i = 0; i < {}; i++) {{
-    //         //     console.log(i);
-    //         //     console.log(vm.constraint_terms[i][0]);
-    //         //     console.log(vm.constraint_terms[i][1]);
-    //         // }}
-    //         // console.log(\"\");\n",
-    //         //     &*common.num_gate_constraints.to_string(),
-    //         // );
-    //     } else if gate_name[0..12].eq("PoseidonGate") {
-    //         todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
-    //     } else {
-    //         todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
-    //     }
-    //     evaluate_gate_constraints_str += &*eval_str;
-    //     evaluate_gate_constraints_str += "        }\n";
-    // }
-    // constants = constants.replace(
-    //     "        $EVALUATE_GATE_CONSTRAINTS;",
-    //     &evaluate_gate_constraints_str[0..evaluate_gate_constraints_str.len() - 1],
-    // );
+    let mut evaluate_gate_constraints_str = "".to_owned();
+    let mut last_component_name = "".to_owned();
+    for (row, gate) in common.gates.iter().enumerate() {
+        if gate.0.id().eq("NoopGate") {
+            continue;
+        }
+        let selector_index = common.selectors_info.selector_indices[row];
+        let group_range = common.selectors_info.groups[selector_index].clone();
+        let mut c = 0;
+
+        evaluate_gate_constraints_str = evaluate_gate_constraints_str + "\n";
+        let mut filter_str = "filter <== ".to_owned();
+        let filter_chain = group_range
+            .filter(|&i| i != row)
+            .chain((num_selectors > 1).then_some(u32::MAX as usize));
+        for i in filter_chain {
+            filter_str += &*("GlExtMul()(GlExtSub()(GlExt(".to_owned()
+                + &i.to_string()
+                + ", 0)(), "
+                + "constants["
+                + &*selector_index.to_string()
+                + "]), ");
+            c = c + 1;
+        }
+        filter_str += &*("GlExt(1, 0)()".to_owned());
+        for _ in 0..c {
+            filter_str = filter_str + ")";
+        }
+        filter_str = filter_str + ";";
+
+        let mut eval_str = "  // ".to_owned() + &*gate.0.id() + "\n";
+        let gate_name = gate.0.id();
+        if gate_name[0..12].eq("ConstantGate") {
+            //TODO: use num_coeff as a param (same TODO for other gates)
+            let mut code_str = gate.0.export_circom_verification_code();
+            code_str = code_str.replace("$SET_FILTER;", &*filter_str);
+            let v: Vec<&str> = code_str.split(' ').collect();
+            let template_name = &v[1][0..v[1].len()-2];
+            let component_name = "c_".to_owned() + template_name;
+            eval_str +=
+                &*("  component ".to_owned() + &*component_name + " = " + template_name + "();\n");
+            eval_str += &*("  ".to_owned() + &*component_name + ".constants <== constants;\n");
+            eval_str += &*("  ".to_owned() + &*component_name + ".wires <== wires;\n");
+            eval_str += &*("  ".to_owned()
+                + &*component_name
+                + ".public_input_hash <== public_input_hash;\n");
+            if last_component_name == "" {
+                eval_str +=
+                    &*("  ".to_owned() + &*component_name + ".constraints <== constraints;\n");
+            } else {
+                eval_str += &*("  ".to_owned()
+                    + &*component_name
+                    + ".constraints <== "
+                    + &*last_component_name
+                    + ".out;\n");
+            }
+            gates_lib += &*(code_str + "\n");
+            last_component_name = component_name.clone();
+            eval_str += &*format!(
+                "  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {{
+    log(i, {}.out[i][0], {}.out[i][1]);
+  }}\n",
+                &*component_name, &*component_name
+            );
+        } else if gate_name.eq("PublicInputGate")
+            || gate_name[0..11].eq("BaseSumGate")
+            || gate_name[0..12].eq("PoseidonGate")
+            || gate_name[0..12].eq("ReducingGate")
+            || gate_name[0..14].eq("ArithmeticGate")
+            || gate_name[0..16].eq("MulExtensionGate")
+            || gate_name[0..16].eq("RandomAccessGate")
+            || gate_name[0..17].eq("U32ArithmeticGate")
+            || gate_name[0..18].eq("ExponentiationGate")
+            || gate_name[0..21].eq("ReducingExtensionGate")
+            || gate_name[0..23].eq("ArithmeticExtensionGate")
+            || gate_name[0..26].eq("LowDegreeInterpolationGate")
+        {
+        } else {
+            todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
+        }
+        evaluate_gate_constraints_str += &*eval_str;
+        // evaluate_gate_constraints_str += "\n";
+    }
+
+    evaluate_gate_constraints_str += &*("  out <== ".to_owned() + &*last_component_name + ".out;");
+    gates_lib = gates_lib.replace(
+        "  $EVALUATE_GATE_CONSTRAINTS;",
+        &evaluate_gate_constraints_str,
+    );
 
     gates_lib = gates_lib.replace(
         "$NUM_GATE_CONSTRAINTS",
@@ -1005,7 +1013,7 @@ mod tests {
     use plonky2::hash::hash_types::RichField;
     use plonky2::iop::witness::Witness;
     use plonky2::plonk::circuit_data::{CommonCircuitData, VerifierOnlyCircuitData};
-    use plonky2::plonk::config::Hasher;
+    use plonky2::plonk::config::{Hasher, PoseidonGoldilocksConfig};
     use plonky2::plonk::proof::ProofWithPublicInputs;
     use plonky2::{
         gates::noop::NoopGate,
@@ -1112,7 +1120,7 @@ mod tests {
     #[test]
     fn test_verifier_with_public_inputs() -> Result<()> {
         const D: usize = 2;
-        type C = PoseidonBN128GoldilocksConfig;
+        type C = PoseidonGoldilocksConfig; //PoseidonBN128GoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
         // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
