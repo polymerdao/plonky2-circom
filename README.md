@@ -55,21 +55,21 @@ Test machine: 32GB RAM, 24 core PC.
 ```shell
 
 ****COMPILING CIRCUIT****
-template instances: 136
-non-linear constraints: 8416603
+template instances: 142
+non-linear constraints: 8771891
 linear constraints: 0
 public inputs: 4
 public outputs: 0
 private inputs: 7321
 private outputs: 0
-wires: 8366434
-labels: 18302856
+wires: 8718375
+labels: 19049523
 Written successfully: ./plonky2.r1cs
 Written successfully: ./plonky2.sym
 Written successfully: ./plonky2_cpp/plonky2.cpp and ./plonky2_cpp/plonky2.dat
 Written successfully: ./plonky2_cpp/main.cpp, circom.hpp, calcwit.hpp, calcwit.cpp, fr.hpp, fr.cpp, fr.asm and Makefile
 Everything went okay, circom safe
-DONE (252s)
+DONE (261s)
 ****COMPILING WITNESS GENERATOR****
 g++ -c main.cpp -std=c++11 -O3 -I.
 g++ -c calcwit.cpp -std=c++11 -O3 -I.
@@ -77,11 +77,11 @@ g++ -c fr.cpp -std=c++11 -O3 -I.
 nasm -felf64 fr.asm -o fr_asm.o
 g++ -c plonky2.cpp -std=c++11 -O3 -I.
 g++ -o plonky2 *.o -lgmp 
-DONE (23s)
+DONE (24s)
 ****GENERATING ZKEY 0****
-DONE (3011s)
+DONE (3091s)
 ****CONTRIBUTE TO PHASE 2 CEREMONY****
-DONE (421s)
+DONE (400s)
 ****VERIFYING FINAL ZKEY (SKIP FOR TESTING)****
 DONE (0s)
 ****EXPORTING VKEY****
@@ -89,13 +89,14 @@ DONE (0s)
 ****WITNESS GENERATION****
 DONE (2s)
 ****GENERATING PROOF****
-DONE (23s)
+DONE (22s)
 ****VERIFYING PROOF****
 [INFO]  snarkJS: OK!
-DONE (0s)
+DONE (1s)
 ****SOLIDITY VERIFIER TEST****
+Compiled 1 Solidity file successfully
   Groth16
-    ✔ Should return true when proof is correct (1310ms)
+    ✔ Should return true when proof is correct (1410ms)
   1 passing (1s)
 
 ```
