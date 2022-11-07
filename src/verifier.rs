@@ -35,7 +35,7 @@ fn recursive_proof<
 >(
     inner_proof: ProofWithPublicInputs<F, InnerC, D>,
     inner_vd: VerifierOnlyCircuitData<InnerC, D>,
-    inner_cd: CommonCircuitData<F, InnerC, D>,
+    inner_cd: CommonCircuitData<F, D>,
     config: &CircuitConfig,
     min_degree_bits: Option<usize>,
     print_gate_counts: bool,
@@ -43,7 +43,7 @@ fn recursive_proof<
 ) -> Result<(
     ProofWithPublicInputs<F, C, D>,
     VerifierOnlyCircuitData<C, D>,
-    CommonCircuitData<F, C, D>,
+    CommonCircuitData<F, D>,
 )>
 where
     InnerC::Hasher: AlgebraicHasher<F>,
@@ -51,18 +51,20 @@ where
 {
     let mut builder = CircuitBuilder::<F, D>::new(config.clone());
     let mut pw = PartialWitness::new();
-    let pt = builder.add_virtual_proof_with_pis(&inner_cd);
+    let pt = builder.add_virtual_proof_with_pis::<InnerC>(&inner_cd);
     pw.set_proof_with_pis_target(&pt, &inner_proof);
 
     let inner_data = VerifierCircuitTarget {
         constants_sigmas_cap: builder.add_virtual_cap(inner_cd.config.fri_config.cap_height),
+        circuit_digest: builder.add_virtual_hash(),
     };
     pw.set_cap_target(
         &inner_data.constants_sigmas_cap,
         &inner_vd.constants_sigmas_cap,
     );
+    pw.set_hash_target(inner_data.circuit_digest, inner_vd.circuit_digest);
 
-    builder.verify_proof(pt, &inner_data, &inner_cd);
+    builder.verify_proof::<InnerC>(pt, &inner_data, &inner_cd);
 
     if print_gate_counts {
         builder.print_gate_counts(0);
@@ -651,7 +653,7 @@ pub fn generate_circom_verifier<
     const D: usize,
 >(
     conf: &VerifierConfig,
-    common: &CommonCircuitData<F, C, D>,
+    common: &CommonCircuitData<F, D>,
     verifier_only: &VerifierOnlyCircuitData<C, D>,
 ) -> anyhow::Result<(String, String, String)> {
     assert_eq!(F::BITS, 64);
@@ -791,7 +793,7 @@ pub fn generate_circom_verifier<
         &*common.config.num_challenges.to_string(),
     );
 
-    let circuit_digest = common.circuit_digest.to_vec();
+    let circuit_digest = verifier_only.circuit_digest.to_vec();
     let mut circuit_digest_str = "".to_owned();
     for i in 0..circuit_digest.len() {
         circuit_digest_str += &*("  cd[".to_owned()
@@ -806,7 +808,7 @@ pub fn generate_circom_verifier<
         "$FRI_RATE_BITS",
         &*common.config.fri_config.rate_bits.to_string(),
     );
-    constants = constants.replace("$DEGREE_BITS", &*common.degree_bits.to_string());
+    constants = constants.replace("$DEGREE_BITS", &*common.degree_bits().to_string());
     constants = constants.replace(
         "$NUM_GATE_CONSTRAINTS",
         &*common.num_gate_constraints.to_string(),
@@ -820,7 +822,7 @@ pub fn generate_circom_verifier<
         &*(common.config.fri_config.proof_of_work_bits + (64 - F::order().bits()) as u32)
             .to_string(),
     );
-    let g = F::Extension::primitive_root_of_unity(common.degree_bits);
+    let g = F::Extension::primitive_root_of_unity(common.degree_bits());
     constants = constants.replace(
         "$G_FROM_DEGREE_BITS_0",
         &g.to_basefield_array()[0].to_string(),
@@ -1160,7 +1162,7 @@ mod tests {
     ) -> Result<(
         ProofWithPublicInputs<F, C, D>,
         VerifierOnlyCircuitData<C, D>,
-        CommonCircuitData<F, C, D>,
+        CommonCircuitData<F, D>,
     )>
     where
         [(); C::Hasher::HASH_SIZE]:,
