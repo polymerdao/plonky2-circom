@@ -2,6 +2,7 @@
 
 pragma circom 2.1.0;
 include "./challenges.circom";
+include "./plonk.circom";
 include "./fri.circom";
 
 template VerifyPlonky2Proof() {
@@ -50,6 +51,26 @@ template VerifyPlonky2Proof() {
   get_challenges.fri_commit_phase_merkle_caps <== fri_commit_phase_merkle_caps;
   get_challenges.fri_final_poly_ext_v <== fri_final_poly_ext_v;
   get_challenges.fri_pow_witness <== fri_pow_witness;
+
+  component eval_vanishing_poly = EvalVanishingPoly();
+
+  eval_vanishing_poly.plonk_betas <== get_challenges.plonk_betas;
+  eval_vanishing_poly.plonk_zeta <== get_challenges.plonk_zeta;
+  eval_vanishing_poly.plonk_gammas <== get_challenges.plonk_gammas;
+  eval_vanishing_poly.openings_wires <== openings_wires;
+  eval_vanishing_poly.openings_plonk_zs <== openings_plonk_zs;
+  eval_vanishing_poly.openings_plonk_sigmas <== openings_plonk_sigmas;
+  eval_vanishing_poly.openings_plonk_zs_next <== openings_plonk_zs_next;
+  eval_vanishing_poly.openings_partial_products <== openings_partial_products;
+
+  component check_zeta = CheckZeta();
+
+  check_zeta.openings_quotient_polys <== openings_quotient_polys;
+  check_zeta.plonk_alphas <== get_challenges.plonk_alphas;
+  check_zeta.plonk_zeta <== get_challenges.plonk_zeta;
+  check_zeta.constraint_terms <== eval_vanishing_poly.constraint_terms;
+  check_zeta.vanishing_partial_products_terms <== eval_vanishing_poly.vanishing_partial_products_terms;
+  check_zeta.vanishing_z_1_terms <== eval_vanishing_poly.vanishing_z_1_terms;
 
   component verify_fri_proof = VerifyFriProof();
 

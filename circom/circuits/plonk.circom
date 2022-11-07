@@ -1,6 +1,7 @@
 pragma circom 2.1.0;
 include "./goldilocks_ext.circom";
 include "./utils.circom";
+// include "./gates.circom"
 
 template EvalL1() {
   signal input n;
@@ -30,10 +31,6 @@ template EvalL1() {
   out[1] <== ced.out[1];
 }
 
-template EvalGateConstraints() {
-
-}
-
 template EvalVanishingPoly() {
   signal input plonk_betas[NUM_CHALLENGES()];
   signal input plonk_zeta[2];
@@ -47,6 +44,15 @@ template EvalVanishingPoly() {
   signal output constraint_terms[NUM_GATE_CONSTRAINTS()][2];
   signal output vanishing_partial_products_terms[NUM_PARTIAL_PRODUCTS_TERMS() * NUM_CHALLENGES()][2];
   signal output vanishing_z_1_terms[NUM_CHALLENGES()][2];
+
+  // TODO: implement it
+  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
+    constraint_terms[i][0] <== 0;
+    constraint_terms[i][1] <== 0;
+  }
+
+  // component c_eval_gates = EvalGateConstraints();
+
   signal l1_x[2] <== EvalL1()((1 << DEGREE_BITS()), plonk_zeta);
   signal one[2];
   one[0] <== 1;
@@ -87,6 +93,7 @@ template EvalVanishingPoly() {
         last_k = k;
         pos++;
       }
+      // Avoid uninitialized signals.
       for (var k = last_k + 1; k < QUOTIENT_DEGREE_FACTOR(); k++) {
         numerator_prod[i][j][k][0] <== 0;
         numerator_prod[i][j][k][1] <== 0;
@@ -158,6 +165,3 @@ template CheckZeta() {
     c_reduce[i][2].out === zeta[i];
   }
 }
-
-// debug only
-component main = EvalVanishingPoly();
