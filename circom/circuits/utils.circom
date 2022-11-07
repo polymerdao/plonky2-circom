@@ -33,27 +33,6 @@ template Reduce(N) {
   out[1] <== add[0].out[1];
 }
 
-template ReduceWithPowers(N) {
-  signal input in[N][2];
-  signal input alpha[2];
-  signal output out[2];
-  component add[N - 1];
-  component mul[N - 1];
-  for (var i = N - 1; i > 0; i--) {
-    mul[i - 1] = GlExtMul();
-    add[i - 1] = GlExtAdd();
-    mul[i - 1].a <== alpha;
-    if (i == N - 1) {
-      mul[i - 1].b <== in[i];
-    } else {
-      mul[i - 1].b <== add[i].out;
-    }
-    add[i - 1].a <== mul[i - 1].out;
-    add[i - 1].b <== in[i - 1];
-  }
-  out <== add[0].out;
-}
-
 // A working but slow implementation
 template RandomAccess(N) {
   signal input a[N];
