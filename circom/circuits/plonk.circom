@@ -66,15 +66,15 @@ template EvalVanishingPoly() {
 
   assert(NUM_PARTIAL_PRODUCTS_TERMS() == NUM_OPENINGS_PARTIAL_PRODUCTS() \ NUM_CHALLENGES() + 1);
   for (var i = 0; i < NUM_CHALLENGES(); i++) {
-    vanishing_z_1_terms[i] <== GlExtMul()(l1_x, GlExtSub()(plonk_zeta, one));
+    vanishing_z_1_terms[i] <== GlExtMul()(l1_x, GlExtSub()(openings_plonk_zs[i], one));
     for (var j = 0; j < NUM_OPENINGS_PLONK_SIGMAS(); j ++) {
-      numerator_values[i][j][0] <== GlExtAdd()(openings_wires[j], GlExtScalarMul()(plonk_zeta, K_IS(j)));
+      numerator_values[i][j][0] <== GlExtAdd()(openings_wires[j], GlExtScalarMul()(GlExtScalarMul()(plonk_zeta, K_IS(j)), plonk_betas[i]));
       numerator_values[i][j][1][0] <== GlAdd()(numerator_values[i][j][0][0], plonk_gammas[i]);
       numerator_values[i][j][1][1] <== numerator_values[i][j][0][1];
 
       denominator_values[i][j][0] <== GlExtAdd()(openings_wires[j], GlExtScalarMul()(openings_plonk_sigmas[j], plonk_betas[i]));
       denominator_values[i][j][1][0] <== GlAdd()(denominator_values[i][j][0][0], plonk_gammas[i]);
-      denominator_values[i][j][1][1] <== numerator_values[i][j][0][1];
+      denominator_values[i][j][1][1] <== denominator_values[i][j][0][1];
     }
     accs[i][0] <== openings_plonk_zs[i];
     accs[i][NUM_PARTIAL_PRODUCTS_TERMS()] <== openings_plonk_zs_next[i];
@@ -156,12 +156,15 @@ template CheckZeta() {
   signal zeta[NUM_CHALLENGES()][2];
   component c_reduce_with_powers[NUM_CHALLENGES()];
   for (var i = 0; i < NUM_CHALLENGES(); i++) {
-    c_reduce_with_powers[i] = ReduceWithPowers(QUOTIENT_DEGREE_FACTOR());
+    c_reduce_with_powers[i] = Reduce(QUOTIENT_DEGREE_FACTOR());
+    c_reduce_with_powers[i].old_eval[0] <== 0;
+    c_reduce_with_powers[i].old_eval[1] <== 0;
     c_reduce_with_powers[i].alpha <== zeta_pow_deg;
     for (var j = 0; j < QUOTIENT_DEGREE_FACTOR(); j++) {
       c_reduce_with_powers[i].in[j] <== openings_quotient_polys[i * QUOTIENT_DEGREE_FACTOR() + j];
     }
     zeta[i] <== GlExtMul()(z_h_zeta, c_reduce_with_powers[i].out);
+
     c_reduce[i][2].out === zeta[i];
   }
 }
