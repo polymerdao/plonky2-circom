@@ -33,6 +33,14 @@ template VerifyPlonky2Proof() {
   signal input fri_query_step1_p[NUM_FRI_QUERY_ROUND()][NUM_FRI_QUERY_STEP1_P()][4];
   signal input fri_final_poly_ext_v[NUM_FRI_FINAL_POLY_EXT_V()][2];
   signal input fri_pow_witness;
+  signal input public_inputs[NUM_PUBLIC_INPUTS()];
+
+  component public_input_hasher = HashNoPad_GL(NUM_PUBLIC_INPUTS(), 4);
+  public_input_hasher.in <== public_inputs;
+  public_input_hasher.capacity[0] <== 0;
+  public_input_hasher.capacity[1] <== 0;
+  public_input_hasher.capacity[2] <== 0;
+  public_input_hasher.capacity[3] <== 0;
 
   component get_challenges = GetChallenges();
 
@@ -51,6 +59,7 @@ template VerifyPlonky2Proof() {
   get_challenges.fri_commit_phase_merkle_caps <== fri_commit_phase_merkle_caps;
   get_challenges.fri_final_poly_ext_v <== fri_final_poly_ext_v;
   get_challenges.fri_pow_witness <== fri_pow_witness;
+  get_challenges.public_input_hash <== public_input_hasher.out;
 
   component eval_vanishing_poly = EvalVanishingPoly();
 
