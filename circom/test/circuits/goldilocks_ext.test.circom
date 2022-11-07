@@ -35,8 +35,7 @@ template GlTest() {
 
   // Ext exp
   component cextexp = GlExtExp();
-  cextexp.x[0] <== 9076502759914437505;
-  cextexp.x[1] <== 16396680756479675411;
+  cextexp.x <== GlExt(9076502759914437505, 16396680756479675411)();
   cextexp.n <== 4096;
 
   cextexp.out[0] === 4994088319481652599;

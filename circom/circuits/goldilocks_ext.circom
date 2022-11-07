@@ -198,3 +198,9 @@ template GlExtScalarMul() {
   out[0] <== GlMul()(x[0], a);
   out[1] <== GlMul()(x[1], a);
 }
+
+template GlExt(x, y) {
+  signal output out[2];
+  out[0] <== x;
+  out[1] <== y;
+}
