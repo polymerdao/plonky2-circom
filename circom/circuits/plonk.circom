@@ -120,20 +120,20 @@ template CheckZeta() {
   for (var i = 0; i < NUM_CHALLENGES(); i++) {
     c_reduce[i][0] = Reduce(NUM_GATE_CONSTRAINTS());
     for (var j = 0; j < NUM_GATE_CONSTRAINTS(); j++) {
-      c_reduce[i][0].in[j] <== constraint_terms[j];
+      c_reduce[i][0].in[j][0] <== constraint_terms[j][0];
+      c_reduce[i][0].in[j][1] <== constraint_terms[j][1];
     }
     c_reduce[i][0].alpha[0] <== plonk_alphas[i];
     c_reduce[i][0].alpha[1] <== 0;
-    if (i == 0) {
-      c_reduce[i][0].old_eval[0] <== 0;
-      c_reduce[i][0].old_eval[1] <== 0;
-    } else {
-      c_reduce[i][0].old_eval <== c_reduce[i - 1][0].out;
-    }
+    c_reduce[i][0].old_eval[0] <== 0;
+    c_reduce[i][0].old_eval[1] <== 0;
 
     c_reduce[i][1] = Reduce(NUM_PARTIAL_PRODUCTS_TERMS() * NUM_CHALLENGES());
     for (var j = 0; j < NUM_PARTIAL_PRODUCTS_TERMS() * NUM_CHALLENGES(); j++) {
-      c_reduce[i][1].in[j] <== vanishing_partial_products_terms[j];
+      // Circom is very buggy, got error with:
+      // c_reduce[i][1].in[j] <== vanishing_partial_products_terms[j];
+      c_reduce[i][1].in[j][0] <== vanishing_partial_products_terms[j][0];
+      c_reduce[i][1].in[j][1] <== vanishing_partial_products_terms[j][1];
     }
     c_reduce[i][1].alpha[0] <== plonk_alphas[i];
     c_reduce[i][1].alpha[1] <== 0;
@@ -141,7 +141,8 @@ template CheckZeta() {
 
     c_reduce[i][2] = Reduce(NUM_CHALLENGES());
     for (var j = 0; j < NUM_CHALLENGES(); j++) {
-      c_reduce[i][2].in[j] <== vanishing_z_1_terms[j];
+      c_reduce[i][2].in[j][0] <== vanishing_z_1_terms[j][0];
+      c_reduce[i][2].in[j][1] <== vanishing_z_1_terms[j][1];
     }
     c_reduce[i][2].alpha[0] <== plonk_alphas[i];
     c_reduce[i][2].alpha[1] <== 0;
