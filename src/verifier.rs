@@ -690,6 +690,7 @@ pub fn generate_circom_verifier<
         &*reduction_arity_bits.len().to_string(),
     );
 
+    constants = constants.replace("$NUM_PUBLIC_INPUTS", &*conf.num_public_inputs.to_string());
     constants = constants.replace("$NUM_WIRES_CAP", &*conf.num_wires_cap.to_string());
     constants = constants.replace(
         "$NUM_PLONK_ZS_PARTIAL_PRODUCTS_CAP",
