@@ -3,7 +3,7 @@ include "./goldilocks.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 
-function GET_GL_CONST(i) {
+function GL_CONST(i) {
     var const[30*12] = [
         0xb585f766f2144405, 0x7746a55f43921ad7, 0xb2fb0d31cee799b4, 0x0f6760a4803427d7,
         0xe10d666650f4e012, 0x8cae14cb07d09bf1, 0xd438539c95f63e9f, 0xef781c7ce35b4c3d,
@@ -155,7 +155,7 @@ template Poseidon_GL(nOuts) {
     for (var i=0; i<4; i++) {
         mds[i] = MDS_GL();
         for (var j=0; j<12; j++) {
-            var c = GET_GL_CONST(i*12+j);
+            var c = GL_CONST(i*12+j);
             f1_x2[i][j] = GlReduce(66);
             f1_x4[i][j] = GlReduce(66);
             f1_x6[i][j] = GlReduce(66);
@@ -170,7 +170,7 @@ template Poseidon_GL(nOuts) {
     }
 
     for (var i=0; i<22; i++) {
-        var c = GET_GL_CONST((4+i)*12);
+        var c = GL_CONST((4+i)*12);
         mds[4+i] = MDS_GL();
         p_x2[i] = GlReduce(66);
         p_x4[i] = GlReduce(66);
@@ -180,7 +180,7 @@ template Poseidon_GL(nOuts) {
         p_x6[i].x <== p_x2[i].out * p_x4[i].out;
         mds[4+i].in[0] <== (state[4+i][0]+c) * p_x6[i].out;
         for (var j=1; j<12; j++) {
-            var c = GET_GL_CONST((4+i)*12 +j);
+            var c = GL_CONST((4+i)*12 +j);
             mds[4+i].in[j] <== state[4+i][j] + c;
         }
 
@@ -189,11 +189,10 @@ template Poseidon_GL(nOuts) {
         }
     }
 
-
     for (var i=0; i<4; i++) {
         mds[26+i] = MDS_GL();
         for (var j=0; j<12; j++) {
-            var c = GET_GL_CONST((26+i)*12+j);
+            var c = GL_CONST((26+i)*12+j);
             f2_x2[i][j] = GlReduce(66);
             f2_x4[i][j] = GlReduce(66);
             f2_x6[i][j] = GlReduce(66);
@@ -210,7 +209,6 @@ template Poseidon_GL(nOuts) {
     for (var j=0; j<nOuts; j++) {
         out[j] <== state[30][j];
     }
-
 }
 
 template Poseidon_BN(nOuts) {

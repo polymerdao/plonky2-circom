@@ -1,6 +1,7 @@
 pragma circom 2.1.0;
 include "./goldilocks_ext.circom";
 include "./utils.circom";
+include "./poseidon.circom";
 
 template ConstraintPush() {
   signal input constraint[2];
