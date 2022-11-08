@@ -1,6 +1,7 @@
 pragma circom 2.1.0;
 include "./constants.circom";
 include "./goldilocks.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
 
 // GlExt: Goldilocks's quadratic extension
 template GlExtAdd() {
@@ -132,16 +133,18 @@ template GlExtDiv() {
   out[1] <== cextmul1.out[1];
 }
 
-template GlExtExp() {
+// n < 1 << N
+template GlExtExpN(N) {
   signal input x[2];
   signal input n;
   signal output out[2];
 
-  signal e2[64][2];
-  signal temp[64];
-  component cextmul[64];
-  component cdouble[64];
-  for (var i = 0; i < 64; i++) {
+  component cbits = Num2Bits(N);
+  cbits.in <== n;
+  signal e2[N][2];
+  component cextmul[N];
+  component cdouble[N];
+  for (var i = 0; i < N; i++) {
     cextmul[i] = GlExtMul();
     cdouble[i] = GlExtSquare();
   }
@@ -150,12 +153,9 @@ template GlExtExp() {
   e2[0][0] <== x[0];
   e2[0][1] <== x[1];
 
-  for (var i = 0; i < 63; i++) {
-    temp[i] <-- (n >> i) & 1;
-    temp[i] * (temp[i] - 1) === 0;
-
-    cextmul[i].b[0] <== e2[i][0] * temp[i] + 1 - temp[i];
-    cextmul[i].b[1] <== e2[i][1] * temp[i];
+  for (var i = 0; i < N - 1; i++) {
+    cextmul[i].b[0] <== e2[i][0] * cbits.out[i] + 1 - cbits.out[i];
+    cextmul[i].b[1] <== e2[i][1] * cbits.out[i];
 
     cextmul[i + 1].a[0] <== cextmul[i].out[0];
     cextmul[i + 1].a[1] <== cextmul[i].out[1];
@@ -166,14 +166,18 @@ template GlExtExp() {
     e2[i + 1][1] <== cdouble[i].out[1];
   }
 
-  temp[63] <-- (n >> 63) & 1;
-  temp[63] * (temp[63] - 1) === 0;
+  cextmul[N - 1].b[0] <== e2[N - 1][0] * cbits.out[N - 1] + 1 - cbits.out[N - 1];
+  cextmul[N - 1].b[1] <== e2[N - 1][1] * cbits.out[N - 1];
 
-  cextmul[63].b[0] <== e2[63][0] * temp[63] + 1 - temp[63];
-  cextmul[63].b[1] <== e2[63][1] * temp[63];
+  out[0] <== cextmul[N - 1].out[0];
+  out[1] <== cextmul[N - 1].out[1];
+}
 
-  out[0] <== cextmul[63].out[0];
-  out[1] <== cextmul[63].out[1];
+template GlExtExp() {
+  signal input x[2];
+  signal input n;
+  signal output out[2];
+  out <== GlExtExpN(64)(x, n);
 }
 
 template GlExtExpPowerOf2(N) {
