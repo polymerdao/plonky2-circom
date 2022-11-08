@@ -894,12 +894,12 @@ pub fn generate_circom_verifier<
 
         let mut eval_str = "  // ".to_owned() + &*gate.0.id() + "\n";
         let gate_name = gate.0.id();
-        if gate_name[0..12].eq("ConstantGate") {
+        if gate_name.eq("PublicInputGate") || gate_name[0..12].eq("ConstantGate") {
             //TODO: use num_coeff as a param (same TODO for other gates)
             let mut code_str = gate.0.export_circom_verification_code();
             code_str = code_str.replace("$SET_FILTER;", &*filter_str);
             let v: Vec<&str> = code_str.split(' ').collect();
-            let template_name = &v[1][0..v[1].len()-2];
+            let template_name = &v[1][0..v[1].len() - 2];
             let component_name = "c_".to_owned() + template_name;
             eval_str +=
                 &*("  component ".to_owned() + &*component_name + " = " + template_name + "();\n");
@@ -926,8 +926,7 @@ pub fn generate_circom_verifier<
   }}\n",
                 &*component_name, &*component_name
             );
-        } else if gate_name.eq("PublicInputGate")
-            || gate_name[0..11].eq("BaseSumGate")
+        } else if gate_name[0..11].eq("BaseSumGate")
             || gate_name[0..12].eq("PoseidonGate")
             || gate_name[0..12].eq("ReducingGate")
             || gate_name[0..14].eq("ArithmeticGate")
