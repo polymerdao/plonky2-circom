@@ -1120,7 +1120,7 @@ mod tests {
     #[test]
     fn test_verifier_with_public_inputs() -> Result<()> {
         const D: usize = 2;
-        type C = PoseidonGoldilocksConfig; //PoseidonBN128GoldilocksConfig;
+        type C = PoseidonGoldilocksConfig; // PoseidonBN128GoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
         // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
