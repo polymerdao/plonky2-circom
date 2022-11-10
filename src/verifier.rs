@@ -64,6 +64,10 @@ where
     );
     pw.set_hash_target(inner_data.circuit_digest, inner_vd.circuit_digest);
 
+    builder.register_public_inputs(inner_data.circuit_digest.elements.as_slice());
+    for i in 0..builder.config.fri_config.num_cap_elements() {
+        builder.register_public_inputs(&inner_data.constants_sigmas_cap.0[i].elements);
+    }
     builder.verify_proof::<InnerC>(pt, &inner_data, &inner_cd);
 
     if print_gate_counts {
@@ -934,7 +938,6 @@ pub fn generate_circom_verifier<
             || gate_name[0..14].eq("ArithmeticGate")
             || gate_name[0..16].eq("MulExtensionGate")
             || gate_name[0..16].eq("RandomAccessGate")
-            || gate_name[0..17].eq("U32ArithmeticGate")
             || gate_name[0..18].eq("ExponentiationGate")
             || gate_name[0..21].eq("ReducingExtensionGate")
             || gate_name[0..23].eq("ArithmeticExtensionGate")
@@ -1014,7 +1017,7 @@ mod tests {
     use plonky2::hash::hash_types::RichField;
     use plonky2::iop::witness::Witness;
     use plonky2::plonk::circuit_data::{CommonCircuitData, VerifierOnlyCircuitData};
-    use plonky2::plonk::config::Hasher;
+    use plonky2::plonk::config::{Hasher, PoseidonGoldilocksConfig};
     use plonky2::plonk::proof::ProofWithPublicInputs;
     use plonky2::{
         gates::noop::NoopGate,
@@ -1173,13 +1176,13 @@ mod tests {
     }
 
     #[test]
-    fn test_recursive_verifier_without_public_inputs() -> Result<()> {
+    fn test_recursive_verifier() -> Result<()> {
         const D: usize = 2;
-        type C = PoseidonBN128GoldilocksConfig;
+        type C = PoseidonGoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
 
-        let (proof, vd, cd) = dummy_proof::<F, C, D>(&standard_config, 4_000, 0)?;
+        let (proof, vd, cd) = dummy_proof::<F, C, D>(&standard_config, 4_000, 4)?;
 
         // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
         let high_rate_config = CircuitConfig {
@@ -1207,18 +1210,16 @@ mod tests {
             },
             ..high_rate_config
         };
-        let (proof, _, _) =
+        let (proof, vd, cd) =
             recursive_proof::<F, C, C, D>(proof, vd, cd, &final_config, None, true, true)?;
 
         let conf = generate_verifier_config(&proof)?;
-        // let (contract, gates_lib, proof_lib) = generate_solidity_verifier(&conf, &cd, &vd)?;
-        //
-        // let mut sol_file = File::create("./contract/contracts/Verifier.sol")?;
-        // sol_file.write_all(contract.as_bytes())?;
-        // sol_file = File::create("./contract/contracts/GatesLib.sol")?;
-        // sol_file.write_all(gates_lib.as_bytes())?;
-        // sol_file = File::create("./contract/contracts/ProofLib.sol")?;
-        // sol_file.write_all(proof_lib.as_bytes())?;
+        let (circom_constants, circom_gates) = generate_circom_verifier(&conf, &cd, &vd)?;
+
+        let mut circom_file = File::create("./circom/circuits/constants.circom")?;
+        circom_file.write_all(circom_constants.as_bytes())?;
+        circom_file = File::create("./circom/circuits/gates.circom")?;
+        circom_file.write_all(circom_gates.as_bytes())?;
 
         let proof_json = generate_proof_base64(&proof, &conf)?;
 

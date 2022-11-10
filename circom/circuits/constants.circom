@@ -11,22 +11,22 @@ function NUM_WIRES_CAP() { return 1; }
 function NUM_PLONK_ZS_PARTIAL_PRODUCTS_CAP() { return 1; }
 function NUM_QUOTIENT_POLYS_CAP() { return 1; }
 
-function NUM_OPENINGS_CONSTANTS() { return 4; }
-function NUM_OPENINGS_PLONK_SIGMAS() { return 65; }
+function NUM_OPENINGS_CONSTANTS() { return 5; }
+function NUM_OPENINGS_PLONK_SIGMAS() { return 37; }
 function NUM_OPENINGS_WIRES() { return 135; }
 function NUM_OPENINGS_PLONK_ZS() { return 2; }
 function NUM_OPENINGS_PLONK_ZS_NEXT() { return 2; }
-function NUM_OPENINGS_PARTIAL_PRODUCTS() { return 16; }
+function NUM_OPENINGS_PARTIAL_PRODUCTS() { return 8; }
 function NUM_OPENINGS_QUOTIENT_POLYS() { return 16; }
 
 function NUM_FRI_COMMIT_ROUND() { return 2; }
 function FRI_COMMIT_MERKLE_CAP_HEIGHT() { return 1; }
 function NUM_FRI_QUERY_ROUND() { return 10; }
-function NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V() { return 69; }
+function NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_V() { return 42; }
 function NUM_FRI_QUERY_INIT_CONSTANTS_SIGMAS_P() { return 20; }
 function NUM_FRI_QUERY_INIT_WIRES_V() { return 135; }
 function NUM_FRI_QUERY_INIT_WIRES_P() { return 20; }
-function NUM_FRI_QUERY_INIT_ZS_PARTIAL_V() { return 18; }
+function NUM_FRI_QUERY_INIT_ZS_PARTIAL_V() { return 10; }
 function NUM_FRI_QUERY_INIT_ZS_PARTIAL_P() { return 20; }
 function NUM_FRI_QUERY_INIT_QUOTIENT_V() { return 16; }
 function NUM_FRI_QUERY_INIT_QUOTIENT_P() { return 20; }
@@ -39,10 +39,10 @@ function NUM_FRI_FINAL_POLY_EXT_V() { return 64; }
 function NUM_SIGMA_CAPS() { return 1; }
 function GET_SIGMA_CAP(i) {
   var sc[1][4];
-  sc[0][0] = 10637361906811925584;
-  sc[0][1] = 6378220806883817368;
-  sc[0][2] = 16119349786830765108;
-  sc[0][3] = 12503210696784074712;
+  sc[0][0] = 8875913181691675315;
+  sc[0][1] = 4998640863472768455;
+  sc[0][2] = 7985455264532601310;
+  sc[0][3] = 17095441495295851380;
   return sc[i];
 }
 
@@ -77,10 +77,10 @@ function NUM_CHALLENGES() { return 2; }
 function MIN_FRI_POW_RESPONSE() { return 20; }
 function CIRCUIT_DIGEST() {
   var cd[4];
-  cd[0] = 7108300556361736860;
-  cd[1] = 329035307281130914;
-  cd[2] = 1935039657351644588;
-  cd[3] = 2351345216630911157;
+  cd[0] = 5712817136126184914;
+  cd[1] = 297828962612601207;
+  cd[2] = 7313592077753433049;
+  cd[3] = 10590069330133021142;
   return cd;
 }
 function SPONGE_RATE() { return 8; }
@@ -92,7 +92,7 @@ function NUM_GATE_CONSTRAINTS() { return 123; }
 function NUM_PARTIAL_PRODUCTS_TERMS() { return NUM_OPENINGS_PLONK_SIGMAS() \ QUOTIENT_DEGREE_FACTOR() + 1; }
 function QUOTIENT_DEGREE_FACTOR() { return 8; }
 function K_IS(i) {
-  var k_is[65];
+  var k_is[37];
   k_is[0] = 1;
   k_is[1] = 7;
   k_is[2] = 49;
@@ -130,34 +130,6 @@ function K_IS(i) {
   k_is[34] = 16889152938674473984;
   k_is[35] = 7543606154233811962;
   k_is[36] = 15911754940807515092;
-  k_is[37] = 701820169165099718;
-  k_is[38] = 4912741184155698026;
-  k_is[39] = 15942444219675301861;
-  k_is[40] = 916645121239607101;
-  k_is[41] = 6416515848677249707;
-  k_is[42] = 8022122801911579307;
-  k_is[43] = 814627405137302186;
-  k_is[44] = 5702391835961115302;
-  k_is[45] = 3023254712898638472;
-  k_is[46] = 2716038920875884983;
-  k_is[47] = 565528376716610560;
-  k_is[48] = 3958698637016273920;
-  k_is[49] = 9264146389699333119;
-  k_is[50] = 9508792519651578870;
-  k_is[51] = 11221315429317299127;
-  k_is[52] = 4762231727562756605;
-  k_is[53] = 14888878023524711914;
-  k_is[54] = 11988425817600061793;
-  k_is[55] = 10132004445542095267;
-  k_is[56] = 15583798910550913906;
-  k_is[57] = 16852872026783475737;
-  k_is[58] = 7289639770996824233;
-  k_is[59] = 14133990258148600989;
-  k_is[60] = 6704211459967285318;
-  k_is[61] = 10035992080941828584;
-  k_is[62] = 14911712358349047125;
-  k_is[63] = 12148266161370408270;
-  k_is[64] = 11250886851934520606;
   return k_is[i];
 }
-function NUM_PUBLIC_INPUTS() { return 4; }
+function NUM_PUBLIC_INPUTS() { return 8; }
