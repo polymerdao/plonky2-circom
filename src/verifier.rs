@@ -1014,7 +1014,7 @@ mod tests {
     use plonky2::hash::hash_types::RichField;
     use plonky2::iop::witness::Witness;
     use plonky2::plonk::circuit_data::{CommonCircuitData, VerifierOnlyCircuitData};
-    use plonky2::plonk::config::{Hasher, PoseidonGoldilocksConfig};
+    use plonky2::plonk::config::Hasher;
     use plonky2::plonk::proof::ProofWithPublicInputs;
     use plonky2::{
         gates::noop::NoopGate,
@@ -1121,7 +1121,7 @@ mod tests {
     #[test]
     fn test_verifier_with_public_inputs() -> Result<()> {
         const D: usize = 2;
-        type C = PoseidonGoldilocksConfig; // PoseidonBN128GoldilocksConfig;
+        type C = PoseidonBN128GoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
         // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
