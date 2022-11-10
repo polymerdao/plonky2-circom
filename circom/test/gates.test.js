@@ -1,5 +1,6 @@
 const path = require("path");
-const proof = require("./data/gates_test_inputs.json");
+const proof = require("./data/proof.json");
+const public_inputs = require("./data/public_inputs.json");
 const fs = require("fs");
 
 const wasm_tester = require("circom_tester").wasm;
@@ -18,7 +19,7 @@ describe("Verify Gates Circuit Test", function () {
             constants: proof.openings_constants,
             wires: proof.openings_wires,
             constraints: new Array(123).fill([0,0]),
-            public_input_hash: proof.public_input_hash,
+            public_input_hash: public_inputs.public_input_hash,
         };
 
         fs.writeFileSync('gates_input.json', JSON.stringify(input));

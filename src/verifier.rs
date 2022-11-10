@@ -900,7 +900,6 @@ pub fn generate_circom_verifier<
         let gate_name = gate.0.id();
         if gate_name.eq("PublicInputGate")
             || gate_name[0..12].eq("ConstantGate")
-            || gate_name[0..12].eq("PoseidonGate")
         {
             //TODO: use num_coeff as a param (same TODO for other gates)
             let mut code_str = gate.0.export_circom_verification_code();
@@ -935,7 +934,9 @@ pub fn generate_circom_verifier<
             );
         } else if gate_name[0..11].eq("BaseSumGate")
             || gate_name[0..12].eq("ReducingGate")
+            || gate_name[0..12].eq("PoseidonGate") // already implemented
             || gate_name[0..14].eq("ArithmeticGate")
+            // || gate_name[0..15].eq("PoseidonMdsGate")
             || gate_name[0..16].eq("MulExtensionGate")
             || gate_name[0..16].eq("RandomAccessGate")
             || gate_name[0..18].eq("ExponentiationGate")
