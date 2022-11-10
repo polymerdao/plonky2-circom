@@ -111,7 +111,7 @@ template Constant$NUM_CONSTANTS() {
   // SPONGE_RATE = 8
   // SPONGE_CAPACITY = 4
   // SPONGE_WIDTH = 12
-  signal state[12][4 * 4 + 2 + 22 * 3][2];
+  signal state[12][4 * 8 + 2 + 22 * 2][2];
   var state_round = 0;
   for (var i = 0; i < 4; i++) {
     state[i][state_round] <== GlExtAdd()(wires[i], wires[25 + i]);
@@ -176,11 +176,15 @@ template Constant$NUM_CONSTANTS() {
   }
   state_round++;
 
-  signal partial_d[12][22 - 1][2];
-  for (var r = 0; r < 22 - 1; r++) {
+  signal partial_d[12][22][2];
+  for (var r = 0; r < 22; r++) {
     out[index] <== ConstraintPush()(constraints[index], filter, GlExtSub()(state[0][state_round - 1], wires[65 + r]));
     index++;
-    state[0][state_round] <== GlExtAdd()(GlExt(FAST_PARTIAL_ROUND_CONSTANTS(r), 0)(), GlExtExpN(3)(wires[65 + r], 7));
+    if (r == 22 - 1) {
+      state[0][state_round] <== GlExtExpN(3)(wires[65 + r], 7);
+    } else {
+      state[0][state_round] <== GlExtAdd()(GlExt(FAST_PARTIAL_ROUND_CONSTANTS(r), 0)(), GlExtExpN(3)(wires[65 + r], 7));
+    }
     for (var i = 1; i < 12; i++) {
       state[i][state_round] <== state[i][state_round - 1];
     }
@@ -195,9 +199,40 @@ template Constant$NUM_CONSTANTS() {
     }
     state_round++;
   }
+  round_ctr += 22;
+
+  // Second set of full rounds.
+  signal mds_row_shf_field2[4][12][13][2];
+  for (var r = 0; r < 4; r ++) {
+    for (var i = 0; i < 12; i++) {
+      state[i][state_round] <== GlExtAdd()(state[i][state_round - 1], GlExt(GL_CONST(i + 12 * round_ctr), 0)());
+    }
+    state_round++;
+    for (var i = 0; i < 12; i++) {
+      state[i][state_round] <== wires[87 + 12 * r + i];
+      out[index] <== ConstraintPush()(constraints[index], filter, GlExtSub()(state[i][state_round - 1], state[i][state_round]));
+      index++;
+    }
+    state_round++;
+    for (var i = 0; i < 12; i++) {
+      state[i][state_round] <== GlExtExpN(3)(state[i][state_round - 1], 7);
+    }
+    state_round++;
+    for (var i = 0; i < 12; i++) { // for r
+      mds_row_shf_field2[r][i][0][0] <== 0;
+      mds_row_shf_field2[r][i][0][1] <== 0;
+      for (var j = 0; j < 12; j++) { // for i,
+        mds_row_shf_field2[r][i][j + 1] <== GlExtAdd()(mds_row_shf_field2[r][i][j], GlExtMul()(state[(i + j) % 12][state_round - 1], GlExt(MDS_MATRIX_CIRC(j), 0)()));
+      }
+      state[i][state_round] <== GlExtAdd()(mds_row_shf_field2[r][i][12], GlExtMul()(state[i][state_round - 1], GlExt(MDS_MATRIX_DIAG(i), 0)()));
+    }
+    state_round++;
+    round_ctr++;
+  }
 
   for (var i = 0; i < 12; i++) {
-    log(state[i][state_round - 1][0], state[i][state_round - 1][1]);
+    out[index] <== ConstraintPush()(constraints[index], filter, GlExtSub()(state[i][state_round - 1], wires[12 + i]));
+    index++;
   }
 
   for (var i = index + 1; i < NUM_GATE_CONSTRAINTS(); i++) {
