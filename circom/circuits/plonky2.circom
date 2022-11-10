@@ -66,11 +66,13 @@ template VerifyPlonky2Proof() {
   eval_vanishing_poly.plonk_betas <== get_challenges.plonk_betas;
   eval_vanishing_poly.plonk_zeta <== get_challenges.plonk_zeta;
   eval_vanishing_poly.plonk_gammas <== get_challenges.plonk_gammas;
+  eval_vanishing_poly.openings_constants <== openings_constants;
   eval_vanishing_poly.openings_wires <== openings_wires;
   eval_vanishing_poly.openings_plonk_zs <== openings_plonk_zs;
   eval_vanishing_poly.openings_plonk_sigmas <== openings_plonk_sigmas;
   eval_vanishing_poly.openings_plonk_zs_next <== openings_plonk_zs_next;
   eval_vanishing_poly.openings_partial_products <== openings_partial_products;
+  eval_vanishing_poly.public_input_hash <== public_input_hasher.out;
 
   component check_zeta = CheckZeta();
 

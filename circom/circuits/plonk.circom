@@ -1,7 +1,7 @@
 pragma circom 2.1.0;
 include "./goldilocks_ext.circom";
 include "./utils.circom";
-// include "./gates.circom"
+include "./gates.circom";
 
 template EvalL1() {
   signal input n;
@@ -35,23 +35,30 @@ template EvalVanishingPoly() {
   signal input plonk_betas[NUM_CHALLENGES()];
   signal input plonk_zeta[2];
   signal input plonk_gammas[NUM_CHALLENGES()];
+  signal input openings_constants[NUM_OPENINGS_CONSTANTS()][2];
   signal input openings_wires[NUM_OPENINGS_WIRES()][2];
   signal input openings_plonk_zs[NUM_OPENINGS_PLONK_ZS()][2];
   signal input openings_plonk_sigmas[NUM_OPENINGS_PLONK_SIGMAS()][2];
   signal input openings_plonk_zs_next[NUM_OPENINGS_PLONK_ZS_NEXT()][2];
   signal input openings_partial_products[NUM_OPENINGS_PARTIAL_PRODUCTS()][2];
+  signal input public_input_hash[4];
 
   signal output constraint_terms[NUM_GATE_CONSTRAINTS()][2];
   signal output vanishing_partial_products_terms[NUM_PARTIAL_PRODUCTS_TERMS() * NUM_CHALLENGES()][2];
   signal output vanishing_z_1_terms[NUM_CHALLENGES()][2];
 
-  // TODO: implement it
+  signal constraints[NUM_GATE_CONSTRAINTS()][2];
   for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    constraint_terms[i][0] <== 0;
-    constraint_terms[i][1] <== 0;
+    constraints[i][0] <== 0;
+    constraints[i][1] <== 0;
   }
 
-  // component c_eval_gates = EvalGateConstraints();
+  component c_eval_gates = EvalGateConstraints();
+  c_eval_gates.constants <== openings_constants;
+  c_eval_gates.wires <== openings_wires;
+  c_eval_gates.public_input_hash <== public_input_hash;
+  c_eval_gates.constraints <== constraints;
+  constraint_terms <== c_eval_gates.out;
 
   signal l1_x[2] <== EvalL1()((1 << DEGREE_BITS()), plonk_zeta);
   signal one[2];
