@@ -15,7 +15,7 @@ Updates
 
 Milestones
 -----
-The first milestone is to verify a dummy plonky2 proof with public inputs using the following
+This project reached its first milestone that is to verify a plonky2 proof with public inputs using the following
 settings:
 
 - High rate config
@@ -29,20 +29,19 @@ Things to do for this milestone:
 
 Implement all required gate constraints evaluation:
 
-+ [ ] NoopGate
-+ [ ] ConstantGate
-+ [ ] PublicInputGate
++ [x] NoopGate
++ [x] ConstantGate
++ [x] PublicInputGate
 + [ ] BaseSumGate
 + [ ] LowDegreeInterpolationGate
 + [ ] ReducingExtensionGate
 + [ ] ReducingGate
 + [ ] ArithmeticGate
-+ [ ] U32ArithmeticGate
 + [ ] ArithmeticExtensionGate
 + [ ] MulExtensionGate
 + [ ] ExponentiationGate
 + [ ] RandomAccessGate
-+ [ ] PoseidonGate
++ [x] PoseidonGate
 
 Optional:
 
