@@ -42,6 +42,14 @@ template EvalGateConstraints() {
   }
 
   // BaseSumGate { num_limbs: 36 } + Base: 2
+  component c_BaseSum36 = BaseSum36();
+  c_BaseSum36.constants <== constants;
+  c_BaseSum36.wires <== wires;
+  c_BaseSum36.public_input_hash <== public_input_hash;
+  c_BaseSum36.constraints <== c_PublicInputGateLib.out;
+  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
+    log(i, c_BaseSum36.out[i][0], c_BaseSum36.out[i][1]);
+  }
 
   // LowDegreeInterpolationGate { subgroup_bits: 4, _phantom: PhantomData }<D=2>
 
@@ -60,7 +68,7 @@ template EvalGateConstraints() {
   // RandomAccessGate { bits: 4, num_copies: 2, num_extra_constants: 1, _phantom: PhantomData }<D=2>
 
   // PoseidonGate { _phantom: PhantomData }<WIDTH=12>
-  out <== c_PublicInputGateLib.out;
+  out <== c_BaseSum36.out;
 }
 template Constant2() {
   signal input constants[NUM_OPENINGS_CONSTANTS()][2];
@@ -96,6 +104,37 @@ template PublicInputGateLib() {
     out[i] <== ConstraintPush()(constraints[i], filter, GlExtSub()(wires[i], hashes[i]));
   }
   for (var i = 4; i < NUM_GATE_CONSTRAINTS(); i++) {
+    out[i] <== constraints[i];
+  }
+}
+template BaseSum36() {
+  signal input constants[NUM_OPENINGS_CONSTANTS()][2];
+  signal input wires[NUM_OPENINGS_WIRES()][2];
+  signal input public_input_hash[4];
+  signal input constraints[NUM_GATE_CONSTRAINTS()][2];
+  signal output out[NUM_GATE_CONSTRAINTS()][2];
+
+  signal filter[2];
+  filter <== GlExtMul()(GlExtSub()(GlExt(0, 0)(), constants[0]), GlExtMul()(GlExtSub()(GlExt(1, 0)(), constants[0]), GlExtMul()(GlExtSub()(GlExt(2, 0)(), constants[0]), GlExtMul()(GlExtSub()(GlExt(4, 0)(), constants[0]), GlExtMul()(GlExtSub()(GlExt(5, 0)(), constants[0]), GlExtMul()(GlExtSub()(GlExt(6, 0)(), constants[0]), GlExtMul()(GlExtSub()(GlExt(4294967295, 0)(), constants[0]), GlExt(1, 0)())))))));
+
+  component reduce = Reduce(36);
+  reduce.alpha <== GlExt(2, 0)();
+  reduce.old_eval <== GlExt(0, 0)();
+  for (var i = 1; i < 36 + 1; i++) {
+    reduce.in[i - 1] <== wires[i];
+  }
+  out[0] <== ConstraintPush()(constraints[0], filter, GlExtSub()(reduce.out, wires[0]));
+  component product[36][2 - 1];
+  for (var i = 0; i < 36; i++) {
+    for (var j = 0; j < 2 - 1; j++) {
+      product[i][j] = GlExtMul();
+      if (j == 0) product[i][j].a <== wires[i + 1];
+      else product[i][j].a <== product[i][j - 1].out;
+      product[i][j].b <== GlExtSub()(wires[i + 1], GlExt(j + 1, 0)());
+    }
+    out[i + 1] <== ConstraintPush()(constraints[i + 1], filter, product[i][2 - 2].out);
+  }
+  for (var i = 36 + 1; i < NUM_GATE_CONSTRAINTS(); i++) {
     out[i] <== constraints[i];
   }
 }
