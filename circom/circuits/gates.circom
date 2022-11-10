@@ -41,16 +41,16 @@ template EvalGateConstraints() {
     log(i, c_PublicInputGateLib.out[i][0], c_PublicInputGateLib.out[i][1]);
   }
 
-  // PoseidonGate { _phantom: PhantomData }<WIDTH=12>
-  component c_Constant$NUM_CONSTANTS = Constant$NUM_CONSTANTS();
-  c_Constant$NUM_CONSTANTS.constants <== constants;
-  c_Constant$NUM_CONSTANTS.wires <== wires;
-  c_Constant$NUM_CONSTANTS.public_input_hash <== public_input_hash;
-  c_Constant$NUM_CONSTANTS.constraints <== c_PublicInputGateLib.out;
+  // PoseidonGate { _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<WIDTH=12>
+  component c_Poseidon12 = Poseidon12();
+  c_Poseidon12.constants <== constants;
+  c_Poseidon12.wires <== wires;
+  c_Poseidon12.public_input_hash <== public_input_hash;
+  c_Poseidon12.constraints <== c_PublicInputGateLib.out;
   for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_Constant$NUM_CONSTANTS.out[i][0], c_Constant$NUM_CONSTANTS.out[i][1]);
+    log(i, c_Poseidon12.out[i][0], c_Poseidon12.out[i][1]);
   }
-  out <== c_Constant$NUM_CONSTANTS.out;
+  out <== c_Poseidon12.out;
 }
 template Constant2() {
   signal input constants[NUM_OPENINGS_CONSTANTS()][2];
@@ -89,7 +89,7 @@ template PublicInputGateLib() {
     out[i] <== constraints[i];
   }
 }
-template Constant$NUM_CONSTANTS() {
+template Poseidon12() {
   signal input constants[NUM_OPENINGS_CONSTANTS()][2];
   signal input wires[NUM_OPENINGS_WIRES()][2];
   signal input public_input_hash[4];
@@ -147,7 +147,7 @@ template Constant$NUM_CONSTANTS() {
       mds_row_shf_field[r][i][0][0] <== 0;
       mds_row_shf_field[r][i][0][1] <== 0;
       for (var j = 0; j < 12; j++) { // for i,
-        mds_row_shf_field[r][i][j + 1] <== GlExtAdd()(mds_row_shf_field[r][i][j], GlExtMul()(state[(i + j) % 12][state_round - 1], GlExt(MDS_MATRIX_CIRC(j), 0)()));
+        mds_row_shf_field[r][i][j + 1] <== GlExtAdd()(mds_row_shf_field[r][i][j], GlExtMul()(state[(i + j) < 12 ? (i + j) : (i + j - 12)][state_round - 1], GlExt(MDS_MATRIX_CIRC(j), 0)()));
       }
       state[i][state_round] <== GlExtAdd()(mds_row_shf_field[r][i][12], GlExtMul()(state[i][state_round - 1], GlExt(MDS_MATRIX_DIAG(i), 0)()));
     }
@@ -160,19 +160,21 @@ template Constant$NUM_CONSTANTS() {
     state[i][state_round] <== GlExtAdd()(state[i][state_round - 1], GlExt(FAST_PARTIAL_FIRST_ROUND_CONSTANT(i), 0)());
   }
   state_round++;
-  signal partial_res[12][11][2];
+  component partial_res[11][11];
   state[0][state_round] <== state[0][state_round - 1];
-  for (var i = 0; i < 11; i++) {
-    partial_res[0][i][0] <== 0;
-    partial_res[0][i][1] <== 0;
-  }
-  for (var r = 1; r < 12; r++) {
-    for (var c = 1; c < 12; c++) {
-      partial_res[r][c - 1] <== GlExtAdd()(partial_res[r - 1][c - 1] ,GlExtMul()(state[r][state_round - 1], GlExt(FAST_PARTIAL_ROUND_INITIAL_MATRIX(r - 1, c - 1), 0)()));
+  for (var r = 0; r < 11; r++) {
+    for (var c = 0; c < 11; c++) {
+      partial_res[r][c] = GlExtAdd();
+      if (r == 0) {
+        partial_res[r][c].a <== GlExt(0, 0)();
+      } else {
+        partial_res[r][c].a <== partial_res[r - 1][c].out;
+      }
+      partial_res[r][c].b <== GlExtMul()(state[r + 1][state_round - 1], GlExt(FAST_PARTIAL_ROUND_INITIAL_MATRIX(r, c), 0)());
     }
   }
   for (var i = 1; i < 12; i++) {
-    state[i][state_round] <== partial_res[11][i - 1];
+    state[i][state_round] <== partial_res[10][i - 1].out;
   }
   state_round++;
 
@@ -222,7 +224,7 @@ template Constant$NUM_CONSTANTS() {
       mds_row_shf_field2[r][i][0][0] <== 0;
       mds_row_shf_field2[r][i][0][1] <== 0;
       for (var j = 0; j < 12; j++) { // for i,
-        mds_row_shf_field2[r][i][j + 1] <== GlExtAdd()(mds_row_shf_field2[r][i][j], GlExtMul()(state[(i + j) % 12][state_round - 1], GlExt(MDS_MATRIX_CIRC(j), 0)()));
+        mds_row_shf_field2[r][i][j + 1] <== GlExtAdd()(mds_row_shf_field2[r][i][j], GlExtMul()(state[(i + j) < 12 ? (i + j) : (i + j - 12)][state_round - 1], GlExt(MDS_MATRIX_CIRC(j), 0)()));
       }
       state[i][state_round] <== GlExtAdd()(mds_row_shf_field2[r][i][12], GlExtMul()(state[i][state_round - 1], GlExt(MDS_MATRIX_DIAG(i), 0)()));
     }
