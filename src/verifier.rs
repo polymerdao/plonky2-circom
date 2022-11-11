@@ -901,6 +901,7 @@ pub fn generate_circom_verifier<
         if gate_name.eq("PublicInputGate")
             || gate_name[0..11].eq("BaseSumGate")
             || gate_name[0..12].eq("ConstantGate")
+            || gate_name[0..26].eq("LowDegreeInterpolationGate")
         {
             //TODO: use num_coeff as a param (same TODO for other gates)
             let mut code_str = gate.0.export_circom_verification_code();
@@ -942,7 +943,6 @@ pub fn generate_circom_verifier<
             || gate_name[0..18].eq("ExponentiationGate")
             || gate_name[0..21].eq("ReducingExtensionGate")
             || gate_name[0..23].eq("ArithmeticExtensionGate")
-            || gate_name[0..26].eq("LowDegreeInterpolationGate")
         {
         } else {
             todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
