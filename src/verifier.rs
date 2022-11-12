@@ -902,7 +902,9 @@ pub fn generate_circom_verifier<
             || gate_name[0..11].eq("BaseSumGate")
             || gate_name[0..12].eq("ConstantGate")
             || gate_name[0..12].eq("ReducingGate")
+            || gate_name[0..14].eq("ArithmeticGate")
             || gate_name[0..21].eq("ReducingExtensionGate")
+            || gate_name[0..23].eq("ArithmeticExtensionGate")
             || gate_name[0..26].eq("LowDegreeInterpolationGate")
         {
             //TODO: use num_coeff as a param (same TODO for other gates)
@@ -937,12 +939,10 @@ pub fn generate_circom_verifier<
                 &*component_name, &*component_name
             );
         } else if gate_name[0..12].eq("PoseidonGate") // already implemented
-            || gate_name[0..14].eq("ArithmeticGate")
             // || gate_name[0..15].eq("PoseidonMdsGate")
             || gate_name[0..16].eq("MulExtensionGate")
             || gate_name[0..16].eq("RandomAccessGate")
             || gate_name[0..18].eq("ExponentiationGate")
-            || gate_name[0..23].eq("ArithmeticExtensionGate")
         {
         } else {
             todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
