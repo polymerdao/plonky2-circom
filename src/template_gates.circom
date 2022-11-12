@@ -5,7 +5,7 @@ include "./goldilocks_ext.circom";
 include "./utils.circom";
 include "./poseidon.circom";
 
-template WiresAlgebreMul(l, r) {
+template WiresAlgebraMul(l, r) {
   signal input wires[NUM_OPENINGS_WIRES()][2];
   signal output out[2][2];
   out[0] <== GlExtAdd()(GlExtMul()(wires[l], wires[r]), GlExtMul()(GlExtMul()(GlExt(7, 0)(), wires[l + 1]), wires[r + 1]));
