@@ -34,8 +34,8 @@ Implement all required gate constraints evaluation:
 + [x] PublicInputGate
 + [x] BaseSumGate
 + [x] LowDegreeInterpolationGate
-+ [ ] ReducingExtensionGate
-+ [ ] ReducingGate
++ [x] ReducingExtensionGate
++ [x] ReducingGate
 + [ ] ArithmeticGate
 + [ ] ArithmeticExtensionGate
 + [ ] MulExtensionGate

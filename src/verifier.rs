@@ -901,6 +901,8 @@ pub fn generate_circom_verifier<
         if gate_name.eq("PublicInputGate")
             || gate_name[0..11].eq("BaseSumGate")
             || gate_name[0..12].eq("ConstantGate")
+            || gate_name[0..12].eq("ReducingGate")
+            || gate_name[0..21].eq("ReducingExtensionGate")
             || gate_name[0..26].eq("LowDegreeInterpolationGate")
         {
             //TODO: use num_coeff as a param (same TODO for other gates)
@@ -934,14 +936,12 @@ pub fn generate_circom_verifier<
   }}\n",
                 &*component_name, &*component_name
             );
-        } else if gate_name[0..12].eq("ReducingGate")
-            || gate_name[0..12].eq("PoseidonGate") // already implemented
+        } else if gate_name[0..12].eq("PoseidonGate") // already implemented
             || gate_name[0..14].eq("ArithmeticGate")
             // || gate_name[0..15].eq("PoseidonMdsGate")
             || gate_name[0..16].eq("MulExtensionGate")
             || gate_name[0..16].eq("RandomAccessGate")
             || gate_name[0..18].eq("ExponentiationGate")
-            || gate_name[0..21].eq("ReducingExtensionGate")
             || gate_name[0..23].eq("ArithmeticExtensionGate")
         {
         } else {
@@ -967,7 +967,6 @@ pub fn generate_circom_verifier<
         &*conf.num_openings_constants.to_string(),
     );
     gates_lib = gates_lib.replace("$NUM_OPENINGS_WIRES", &*conf.num_openings_wires.to_string());
-    gates_lib = gates_lib.replace("$D", &*D.to_string());
     gates_lib = gates_lib.replace("$F_EXT_W", &*F::W.to_basefield_array()[0].to_string());
 
     let sigma_cap_count = 1 << common.config.fri_config.cap_height;
