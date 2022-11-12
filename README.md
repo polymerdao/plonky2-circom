@@ -36,10 +36,10 @@ Implement all required gate constraints evaluation:
 + [x] LowDegreeInterpolationGate
 + [x] ReducingExtensionGate
 + [x] ReducingGate
-+ [ ] ArithmeticGate
-+ [ ] ArithmeticExtensionGate
-+ [ ] MulExtensionGate
-+ [ ] ExponentiationGate
++ [x] ArithmeticGate
++ [x] ArithmeticExtensionGate
++ [x] MulExtensionGate
++ [x] ExponentiationGate
 + [ ] RandomAccessGate
 + [x] PoseidonGate
 

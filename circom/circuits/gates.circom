@@ -119,11 +119,19 @@ template EvalGateConstraints() {
   }
 
   // ExponentiationGate { num_power_bits: 35, _phantom: PhantomData }<D=2>
+  component c_Exponentiation35 = Exponentiation35();
+  c_Exponentiation35.constants <== constants;
+  c_Exponentiation35.wires <== wires;
+  c_Exponentiation35.public_input_hash <== public_input_hash;
+  c_Exponentiation35.constraints <== c_MultiplicationExtension6.out;
+  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
+    log(i, c_Exponentiation35.out[i][0], c_Exponentiation35.out[i][1]);
+  }
 
   // RandomAccessGate { bits: 4, num_copies: 2, num_extra_constants: 1, _phantom: PhantomData }<D=2>
 
   // PoseidonGate { _phantom: PhantomData }<WIDTH=12>
-  out <== c_MultiplicationExtension6.out;
+  out <== c_Exponentiation35.out;
 }
 template Constant2() {
   signal input constants[NUM_OPENINGS_CONSTANTS()][2];
@@ -409,6 +417,39 @@ template MultiplicationExtension6() {
     }
   }
   for (var i = 6 * 2; i < NUM_GATE_CONSTRAINTS(); i++) {
+    out[i] <== constraints[i];
+  }
+}
+template Exponentiation35() {
+  signal input constants[NUM_OPENINGS_CONSTANTS()][2];
+  signal input wires[NUM_OPENINGS_WIRES()][2];
+  signal input public_input_hash[4];
+  signal input constraints[NUM_GATE_CONSTRAINTS()][2];
+  signal output out[NUM_GATE_CONSTRAINTS()][2];
+
+  signal filter[2];
+  filter <== GlExtMul()(GlExtSub()(GlExt(7, 0)(), constants[1]), GlExtMul()(GlExtSub()(GlExt(8, 0)(), constants[1]), GlExtMul()(GlExtSub()(GlExt(9, 0)(), constants[1]), GlExtMul()(GlExtSub()(GlExt(4294967295, 0)(), constants[1]), GlExt(1, 0)()))));
+
+  out[0] <== ConstraintPush()(constraints[0], filter,
+              GlExtSub()(GlExtMul()(GlExt(1, 0)(),
+                                    GlExtAdd()(GlExtMul()(wires[35], wires[0]),
+                                               GlExtSub()(GlExt(1, 0)(), wires[35])
+                                               )
+                                    ),
+                         wires[35 + 2]));
+  for (var i = 1; i < 35; i++) {
+    // prev_intermediate_value * (cur_bit * wires[0] + (1 - cur_bit)) - wires[35 + 2 + i]
+    out[i] <== ConstraintPush()(constraints[i], filter,
+                GlExtSub()(GlExtMul()(GlExtSquare()(wires[35 + 1 + i]),
+                                      GlExtAdd()(GlExtMul()(wires[35 - i], wires[0]),
+                                                 GlExtSub()(GlExt(1, 0)(), wires[35 - i])
+                                                 )
+                                      ),
+                           wires[35 + 2 + i]));
+  }
+  out[35] <== ConstraintPush()(constraints[35], filter, GlExtSub()(wires[35 + 1], wires[2 * 35 + 1]));
+
+  for (var i = 35 + 1; i < NUM_GATE_CONSTRAINTS(); i++) {
     out[i] <== constraints[i];
   }
 }
