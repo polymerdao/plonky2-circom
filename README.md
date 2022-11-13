@@ -56,22 +56,16 @@ Recursive proof (proof size: 58916)
    Compiling plonky2_circom_verifier v0.1.0 (/home/sai/Project/polymer/plonky2-circom)
     Finished release [optimized] target(s) in 4.63s
      Running unittests src/lib.rs (target/release/deps/plonky2_circom_verifier-4dfa06387e9d7dae)
-
 running 1 test
 test verifier::tests::test_recursive_verifier has been running for over 60 seconds
 test verifier::tests::test_recursive_verifier ... ok
-
 successes:
-
+---- verifier::tests::test_recursive_verifier stdout ----
 Generating Circom files ...
 proof size: 58916
-
-
 successes:
     verifier::tests::test_recursive_verifier
-
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 171.39s
-
 DONE (0s)
 ****COMPILING CIRCUIT****
 template instances: 958
@@ -114,15 +108,40 @@ DONE (25s)
 DONE (1s)
 ****SOLIDITY VERIFIER TEST****
 Compiled 1 Solidity file successfully
-
-
   Groth16
     ✔ Should return true when proof is correct (1408ms)
-
-
   1 passing (1s)
-
 ```
+Verify a new Plonky2 proof using the same circuits
+```shell
+****GENERATING RECURSIVE PLONKY2 PROOF****
+   Compiling plonky2_circom_verifier v0.1.0 (/home/sai/Project/polymer/plonky2-circom)
+    Finished release [optimized] target(s) in 4.52s
+     Running unittests src/lib.rs (target/release/deps/plonky2_circom_verifier-4dfa06387e9d7dae)
+running 1 test
+test verifier::tests::test_recursive_verifier has been running for over 60 seconds
+test verifier::tests::test_recursive_verifier ... ok
+successes:
+---- verifier::tests::test_recursive_verifier stdout ----
+Generating Circom files ...
+proof size: 58916
+successes:
+    verifier::tests::test_recursive_verifier
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 177.80s
+DONE (0s)
+****WITNESS GENERATION****
+DONE (3s)
+****GENERATING PROOF****
+DONE (26s)
+****VERIFYING PROOF****
+[INFO]  snarkJS: OK!
+DONE (0s)
+****SOLIDITY VERIFIER TEST****
+  Groth16
+    ✔ Should return true when proof is correct (1388ms)
+  1 passing (1s)
+```
+
 Proof without any custom gates (Proof size: 58660)
 
 ```shell
