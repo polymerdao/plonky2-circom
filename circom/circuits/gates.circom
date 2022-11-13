@@ -34,9 +34,6 @@ template EvalGateConstraints() {
   c_Constant2.wires <== wires;
   c_Constant2.public_input_hash <== public_input_hash;
   c_Constant2.constraints <== constraints;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_Constant2.out[i][0], c_Constant2.out[i][1]);
-  }
 
   // PublicInputGate
   component c_PublicInputGateLib = PublicInputGateLib();
@@ -44,9 +41,6 @@ template EvalGateConstraints() {
   c_PublicInputGateLib.wires <== wires;
   c_PublicInputGateLib.public_input_hash <== public_input_hash;
   c_PublicInputGateLib.constraints <== c_Constant2.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_PublicInputGateLib.out[i][0], c_PublicInputGateLib.out[i][1]);
-  }
 
   // BaseSumGate { num_limbs: 36 } + Base: 2
   component c_BaseSum36 = BaseSum36();
@@ -54,9 +48,6 @@ template EvalGateConstraints() {
   c_BaseSum36.wires <== wires;
   c_BaseSum36.public_input_hash <== public_input_hash;
   c_BaseSum36.constraints <== c_PublicInputGateLib.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_BaseSum36.out[i][0], c_BaseSum36.out[i][1]);
-  }
 
   // LowDegreeInterpolationGate { subgroup_bits: 4, _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<D=2>
   component c_LowDegreeInterpolation4 = LowDegreeInterpolation4();
@@ -64,9 +55,6 @@ template EvalGateConstraints() {
   c_LowDegreeInterpolation4.wires <== wires;
   c_LowDegreeInterpolation4.public_input_hash <== public_input_hash;
   c_LowDegreeInterpolation4.constraints <== c_BaseSum36.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_LowDegreeInterpolation4.out[i][0], c_LowDegreeInterpolation4.out[i][1]);
-  }
 
   // ReducingExtensionGate { num_coeffs: 15 }
   component c_ReducingExtension15 = ReducingExtension15();
@@ -74,9 +62,6 @@ template EvalGateConstraints() {
   c_ReducingExtension15.wires <== wires;
   c_ReducingExtension15.public_input_hash <== public_input_hash;
   c_ReducingExtension15.constraints <== c_LowDegreeInterpolation4.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_ReducingExtension15.out[i][0], c_ReducingExtension15.out[i][1]);
-  }
 
   // ReducingGate { num_coeffs: 31 }
   component c_Reducing31 = Reducing31();
@@ -84,9 +69,6 @@ template EvalGateConstraints() {
   c_Reducing31.wires <== wires;
   c_Reducing31.public_input_hash <== public_input_hash;
   c_Reducing31.constraints <== c_ReducingExtension15.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_Reducing31.out[i][0], c_Reducing31.out[i][1]);
-  }
 
   // ArithmeticExtensionGate { num_ops: 4 }
   component c_ArithmeticExtension4 = ArithmeticExtension4();
@@ -94,9 +76,6 @@ template EvalGateConstraints() {
   c_ArithmeticExtension4.wires <== wires;
   c_ArithmeticExtension4.public_input_hash <== public_input_hash;
   c_ArithmeticExtension4.constraints <== c_Reducing31.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_ArithmeticExtension4.out[i][0], c_ArithmeticExtension4.out[i][1]);
-  }
 
   // ArithmeticGate { num_ops: 9 }
   component c_Arithmetic9 = Arithmetic9();
@@ -104,9 +83,6 @@ template EvalGateConstraints() {
   c_Arithmetic9.wires <== wires;
   c_Arithmetic9.public_input_hash <== public_input_hash;
   c_Arithmetic9.constraints <== c_ArithmeticExtension4.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_Arithmetic9.out[i][0], c_Arithmetic9.out[i][1]);
-  }
 
   // MulExtensionGate { num_ops: 6 }
   component c_MultiplicationExtension6 = MultiplicationExtension6();
@@ -114,9 +90,6 @@ template EvalGateConstraints() {
   c_MultiplicationExtension6.wires <== wires;
   c_MultiplicationExtension6.public_input_hash <== public_input_hash;
   c_MultiplicationExtension6.constraints <== c_Arithmetic9.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_MultiplicationExtension6.out[i][0], c_MultiplicationExtension6.out[i][1]);
-  }
 
   // ExponentiationGate { num_power_bits: 35, _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<D=2>
   component c_Exponentiation35 = Exponentiation35();
@@ -124,9 +97,6 @@ template EvalGateConstraints() {
   c_Exponentiation35.wires <== wires;
   c_Exponentiation35.public_input_hash <== public_input_hash;
   c_Exponentiation35.constraints <== c_MultiplicationExtension6.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_Exponentiation35.out[i][0], c_Exponentiation35.out[i][1]);
-  }
 
   // RandomAccessGate { bits: 4, num_copies: 2, num_extra_constants: 1, _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<D=2>
   component c_RandomAccessB4C2E1 = RandomAccessB4C2E1();
@@ -134,9 +104,6 @@ template EvalGateConstraints() {
   c_RandomAccessB4C2E1.wires <== wires;
   c_RandomAccessB4C2E1.public_input_hash <== public_input_hash;
   c_RandomAccessB4C2E1.constraints <== c_Exponentiation35.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_RandomAccessB4C2E1.out[i][0], c_RandomAccessB4C2E1.out[i][1]);
-  }
 
   // PoseidonGate { _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<WIDTH=12>
   component c_Poseidon12 = Poseidon12();
@@ -144,9 +111,6 @@ template EvalGateConstraints() {
   c_Poseidon12.wires <== wires;
   c_Poseidon12.public_input_hash <== public_input_hash;
   c_Poseidon12.constraints <== c_RandomAccessB4C2E1.out;
-  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {
-    log(i, c_Poseidon12.out[i][0], c_Poseidon12.out[i][1]);
-  }
   out <== c_Poseidon12.out;
 }
 template Constant2() {
