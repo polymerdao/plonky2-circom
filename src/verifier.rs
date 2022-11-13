@@ -936,12 +936,12 @@ pub fn generate_circom_verifier<
             }
             gates_lib += &*(code_str + "\n");
             last_component_name = component_name.clone();
-            eval_str += &*format!(
-                "  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {{
-    log(i, {}.out[i][0], {}.out[i][1]);
-  }}\n",
-                &*component_name, &*component_name
-            );
+  //           eval_str += &*format!(
+  //               "  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {{
+  //   log(i, {}.out[i][0], {}.out[i][1]);
+  // }}\n",
+  //               &*component_name, &*component_name
+  //           );
         } else {
             todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
         }
