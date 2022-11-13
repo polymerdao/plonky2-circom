@@ -40,7 +40,7 @@ Implement all required gate constraints evaluation:
 + [x] ArithmeticExtensionGate
 + [x] MulExtensionGate
 + [x] ExponentiationGate
-+ [ ] RandomAccessGate
++ [x] RandomAccessGate
 + [x] PoseidonGate
 
 Optional:

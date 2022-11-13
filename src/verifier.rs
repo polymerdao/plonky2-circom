@@ -902,6 +902,7 @@ pub fn generate_circom_verifier<
             || gate_name[0..11].eq("BaseSumGate")
             || gate_name[0..12].eq("ConstantGate")
             || gate_name[0..12].eq("ReducingGate")
+            || gate_name[0..12].eq("PoseidonGate")
             || gate_name[0..14].eq("ArithmeticGate")
             || gate_name[0..16].eq("MulExtensionGate")
             || gate_name[0..16].eq("RandomAccessGate")
@@ -941,9 +942,6 @@ pub fn generate_circom_verifier<
   }}\n",
                 &*component_name, &*component_name
             );
-        } else if gate_name[0..12].eq("PoseidonGate") // already implemented
-            // || gate_name[0..15].eq("PoseidonMdsGate")
-        {
         } else {
             todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
         }
