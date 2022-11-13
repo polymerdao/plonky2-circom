@@ -3,6 +3,7 @@
 Updates
 -----
 
+- **11/13/2022** Finished verification circuits for BN128 Poseidon based recursive Plonky2 proof. Test results are in the last section.
 - **11/10/2022** Implemented Circom circuits to support verification of a Plonky2 proof with public inputs and custom
   gates (constant, public inputs and Poseidon). Test results are in the last section.
 - **11/03/2022** Switched to use BN128 field:
@@ -15,7 +16,7 @@ Updates
 
 Milestones
 -----
-This project reached its first milestone that is to verify a plonky2 proof with public inputs using the following
+This project reached the milestone to verify any recursive plonky2 proof with public inputs using the following
 settings:
 
 - High rate config
@@ -23,11 +24,7 @@ settings:
 - QuadraticExtension
 - Poseidon hasher
 
-The next milestone is to verify any recursive proof with the above settings.
-
-Things to do for this milestone:
-
-Implement all required gate constraints evaluation:
+Supported custom gates:
 
 + [x] NoopGate
 + [x] ConstantGate
@@ -52,6 +49,80 @@ Results
 
 Test machine: 32GB RAM, 24 core PC.
 
+Recursive proof (proof size: 58916)
+
+```shell
+****GENERATING RECURSIVE PLONKY2 PROOF****
+   Compiling plonky2_circom_verifier v0.1.0 (/home/sai/Project/polymer/plonky2-circom)
+    Finished release [optimized] target(s) in 4.63s
+     Running unittests src/lib.rs (target/release/deps/plonky2_circom_verifier-4dfa06387e9d7dae)
+
+running 1 test
+test verifier::tests::test_recursive_verifier has been running for over 60 seconds
+test verifier::tests::test_recursive_verifier ... ok
+
+successes:
+
+Generating Circom files ...
+proof size: 58916
+
+
+successes:
+    verifier::tests::test_recursive_verifier
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 171.39s
+
+DONE (0s)
+****COMPILING CIRCUIT****
+template instances: 958
+non-linear constraints: 12892923
+linear constraints: 0
+public inputs: 4
+public outputs: 0
+private inputs: 7353
+private outputs: 0
+wires: 12799230
+labels: 27782784
+Written successfully: ./plonky2.r1cs
+Written successfully: ./plonky2.sym
+Written successfully: ./plonky2_cpp/plonky2.cpp and ./plonky2_cpp/plonky2.dat
+Written successfully: ./plonky2_cpp/main.cpp, circom.hpp, calcwit.hpp, calcwit.cpp, fr.hpp, fr.cpp, fr.asm and Makefile
+Everything went okay, circom safe
+DONE (483s)
+****COMPILING WITNESS GENERATOR****
+g++ -c main.cpp -std=c++11 -O3 -I.
+g++ -c calcwit.cpp -std=c++11 -O3 -I.
+g++ -c fr.cpp -std=c++11 -O3 -I.
+nasm -felf64 fr.asm -o fr_asm.o
+g++ -c plonky2.cpp -std=c++11 -O3 -I.
+g++ -o plonky2 *.o -lgmp 
+DONE (89s)
+****GENERATING ZKEY 0****
+DONE (13174s)
+****CONTRIBUTE TO PHASE 2 CEREMONY****
+DONE (484s)
+****VERIFYING FINAL ZKEY (SKIP FOR TESTING)****
+DONE (0s)
+****EXPORTING VKEY****
+DONE (0s)
+****WITNESS GENERATION****
+DONE (3s)
+****GENERATING PROOF****
+DONE (25s)
+****VERIFYING PROOF****
+[INFO]  snarkJS: OK!
+DONE (1s)
+****SOLIDITY VERIFIER TEST****
+Compiled 1 Solidity file successfully
+
+
+  Groth16
+    ✔ Should return true when proof is correct (1408ms)
+
+
+  1 passing (1s)
+
+```
 Proof without any custom gates (Proof size: 58660)
 
 ```shell

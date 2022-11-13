@@ -662,7 +662,7 @@ pub fn generate_circom_verifier<
 ) -> anyhow::Result<(String, String)> {
     assert_eq!(F::BITS, 64);
     assert_eq!(F::Extension::BITS, 128);
-    println!("Generating solidity verifier files ...");
+    println!("Generating Circom files ...");
 
     // Load template contract
     let mut constants = std::fs::read_to_string("./src/template_constants.circom")
@@ -1208,8 +1208,9 @@ mod tests {
             },
             ..high_rate_config
         };
+        type CBn128 = PoseidonBN128GoldilocksConfig;
         let (proof, vd, cd) =
-            recursive_proof::<F, C, C, D>(proof, vd, cd, &final_config, None, true, true)?;
+            recursive_proof::<F, CBn128, C, D>(proof, vd, cd, &final_config, None, true, true)?;
 
         let conf = generate_verifier_config(&proof)?;
         let (circom_constants, circom_gates) = generate_circom_verifier(&conf, &cd, &vd)?;

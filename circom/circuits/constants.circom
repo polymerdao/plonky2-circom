@@ -39,10 +39,10 @@ function NUM_FRI_FINAL_POLY_EXT_V() { return 64; }
 function NUM_SIGMA_CAPS() { return 1; }
 function GET_SIGMA_CAP(i) {
   var sc[1][4];
-  sc[0][0] = 8875913181691675315;
-  sc[0][1] = 4998640863472768455;
-  sc[0][2] = 7985455264532601310;
-  sc[0][3] = 17095441495295851380;
+  sc[0][0] = 5648971422766157139;
+  sc[0][1] = 12965406040596548853;
+  sc[0][2] = 2263297872239767740;
+  sc[0][3] = 14961096788223642748;
   return sc[i];
 }
 
@@ -77,10 +77,10 @@ function NUM_CHALLENGES() { return 2; }
 function MIN_FRI_POW_RESPONSE() { return 20; }
 function CIRCUIT_DIGEST() {
   var cd[4];
-  cd[0] = 5712817136126184914;
-  cd[1] = 297828962612601207;
-  cd[2] = 7313592077753433049;
-  cd[3] = 10590069330133021142;
+  cd[0] = 6038443355821742190;
+  cd[1] = 4369284415413355319;
+  cd[2] = 12960228760567342835;
+  cd[3] = 16282856563460049934;
   return cd;
 }
 function SPONGE_RATE() { return 8; }
