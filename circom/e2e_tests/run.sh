@@ -47,7 +47,6 @@ end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
 echo "****WITNESS GENERATION****"
-# If failed: check if there is any empty components and/or i/o
 start=$(date +%s)
 ./${CIRCUIT_NAME}_cpp/${CIRCUIT_NAME} ${INPUT_PATH} ./witness.wtns
 end=$(date +%s)
