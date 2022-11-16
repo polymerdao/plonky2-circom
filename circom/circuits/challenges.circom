@@ -216,7 +216,7 @@ template GetChallenges() {
     // log(fri_query_indices[i - 4]);
   }
 
-  assert(NUM_FRI_QUERY_ROUND() < 4 + SPONGE_RATE());
+  assert(NUM_FRI_QUERY_ROUND() <= 4 + 3 * SPONGE_RATE());
   component observe_batch_6 = HashNoPad_BN(SPONGE_RATE(), SPONGE_WIDTH());
   for (var i = 0; i < SPONGE_RATE(); i++) {
     observe_batch_6.in[i] <== observe_batch_5.out[i];
@@ -224,9 +224,39 @@ template GetChallenges() {
   for (var i = 0; i < 4; i++) {
     observe_batch_6.capacity[i] <== observe_batch_5.out[SPONGE_RATE() + i];
   }
-  for (var i = 0; i < NUM_FRI_QUERY_ROUND() - 4; i++) {
-    mod_lde_size[i + 4].x <== observe_batch_6.out[SPONGE_RATE() - 1 - i];
-    fri_query_indices[i + 4] <== mod_lde_size[i + 4].out;
-    // log(fri_query_indices[i + 4]);
+  for (var i = 4; i < NUM_FRI_QUERY_ROUND() && i < 4 + SPONGE_RATE(); i++) {
+    mod_lde_size[i].x <== observe_batch_6.out[SPONGE_RATE() - 1 - (i - 4)];
+    fri_query_indices[i] <== mod_lde_size[i].out;
+    // log(fri_query_indices[i]);
+  }
+
+  component observe_batch_7 = HashNoPad_BN(SPONGE_RATE(), SPONGE_WIDTH());
+  if (NUM_FRI_QUERY_ROUND() - 4 > SPONGE_RATE()) {
+    for (var i = 0; i < SPONGE_RATE(); i++) {
+      observe_batch_7.in[i] <== observe_batch_6.out[i];
+    }
+    for (var i = 0; i < 4; i++) {
+      observe_batch_7.capacity[i] <== observe_batch_6.out[SPONGE_RATE() + i];
+    }
+    for (var i = 4 + SPONGE_RATE(); i < NUM_FRI_QUERY_ROUND() && i < 4 + 2 * SPONGE_RATE(); i++) {
+      mod_lde_size[i].x <== observe_batch_7.out[SPONGE_RATE() - 1 - (i - 4 - SPONGE_RATE())];
+      fri_query_indices[i] <== mod_lde_size[i].out;
+      // log(fri_query_indices[i]);
+    }
+  }
+
+  component observe_batch_8 = HashNoPad_BN(SPONGE_RATE(), SPONGE_WIDTH());
+  if (NUM_FRI_QUERY_ROUND() - 4 > 2 * SPONGE_RATE()) {
+    for (var i = 0; i < SPONGE_RATE(); i++) {
+      observe_batch_8.in[i] <== observe_batch_7.out[i];
+    }
+    for (var i = 0; i < 4; i++) {
+      observe_batch_8.capacity[i] <== observe_batch_7.out[SPONGE_RATE() + i];
+    }
+    for (var i = 4 + 2 * SPONGE_RATE(); i < NUM_FRI_QUERY_ROUND() && i < 4 + 3 * SPONGE_RATE(); i++) {
+      mod_lde_size[i].x <== observe_batch_8.out[SPONGE_RATE() - 1 - (i - 4 - 2 * SPONGE_RATE())];
+      fri_query_indices[i] <== mod_lde_size[i].out;
+      // log(fri_query_indices[i]);
+    }
   }
 }

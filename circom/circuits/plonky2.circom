@@ -120,4 +120,4 @@ template VerifyPlonky2Proof() {
   verify_fri_proof.fri_query_indices <== get_challenges.fri_query_indices;
 }
 
-component main {public [wires_cap]} = VerifyPlonky2Proof();
+component main {public [public_inputs]} = VerifyPlonky2Proof();

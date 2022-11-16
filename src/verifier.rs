@@ -256,8 +256,7 @@ pub fn generate_proof_base64<
 
     let mut wires_cap = vec![vec!["0".to_string(); 4]; conf.num_wires_cap];
     for i in 0..conf.num_wires_cap {
-        let h = pwpi.proof.wires_cap.flatten();
-        assert_eq!(h.len(), 4);
+        let h = pwpi.proof.wires_cap.0[i].to_vec();
         for j in 0..h.len() {
             wires_cap[i][j] = h[j].to_canonical_u64().to_string();
         }
@@ -266,8 +265,7 @@ pub fn generate_proof_base64<
     let mut plonk_zs_partial_products_cap =
         vec![vec!["0".to_string(); 4]; conf.num_plonk_zs_partial_products_cap];
     for i in 0..conf.num_plonk_zs_partial_products_cap {
-        let h = pwpi.proof.plonk_zs_partial_products_cap.flatten();
-        assert_eq!(h.len(), 4);
+        let h = pwpi.proof.plonk_zs_partial_products_cap.0[i].to_vec();
         for j in 0..h.len() {
             plonk_zs_partial_products_cap[i][j] = h[j].to_canonical_u64().to_string();
         }
@@ -275,8 +273,7 @@ pub fn generate_proof_base64<
 
     let mut quotient_polys_cap = vec![vec!["0".to_string(); 4]; conf.num_quotient_polys_cap];
     for i in 0..conf.num_quotient_polys_cap {
-        let h = pwpi.proof.quotient_polys_cap.flatten();
-        assert_eq!(h.len(), 4);
+        let h = pwpi.proof.quotient_polys_cap.0[i].to_vec();
         for j in 0..h.len() {
             quotient_polys_cap[i][j] = h[j].to_canonical_u64().to_string();
         }
@@ -904,6 +901,7 @@ pub fn generate_circom_verifier<
             || gate_name[0..12].eq("ReducingGate")
             || gate_name[0..12].eq("PoseidonGate")
             || gate_name[0..14].eq("ArithmeticGate")
+            || gate_name[0..15].eq("PoseidonMdsGate")
             || gate_name[0..16].eq("MulExtensionGate")
             || gate_name[0..16].eq("RandomAccessGate")
             || gate_name[0..18].eq("ExponentiationGate")
@@ -1126,29 +1124,29 @@ mod tests {
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
         // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
-        let high_rate_config = CircuitConfig {
-            fri_config: FriConfig {
-                rate_bits: 7,
-                proof_of_work_bits: 16,
-                num_query_rounds: 12,
-                ..standard_config.fri_config.clone()
-            },
-            ..standard_config
-        };
-        // A final proof, optimized for size.
-        let final_config = CircuitConfig {
-            num_routed_wires: 65,
-            fri_config: FriConfig {
-                rate_bits: 8,
-                cap_height: 0,
-                proof_of_work_bits: 20,
-                reduction_strategy: FriReductionStrategy::MinSize(None),
-                num_query_rounds: 10,
-            },
-            ..high_rate_config
-        };
+        // let high_rate_config = CircuitConfig {
+        //     fri_config: FriConfig {
+        //         rate_bits: 7,
+        //         proof_of_work_bits: 16,
+        //         num_query_rounds: 12,
+        //         ..standard_config.fri_config.clone()
+        //     },
+        //     ..standard_config
+        // };
+        // // A final proof, optimized for size.
+        // let final_config = CircuitConfig {
+        //     num_routed_wires: 65,
+        //     fri_config: FriConfig {
+        //         rate_bits: 8,
+        //         cap_height: 0,
+        //         proof_of_work_bits: 20,
+        //         reduction_strategy: FriReductionStrategy::MinSize(None),
+        //         num_query_rounds: 10,
+        //     },
+        //     ..high_rate_config
+        // };
 
-        let (proof, vd, cd) = dummy_proof::<F, C, D>(&final_config, 4_000, 4)?;
+        let (proof, vd, cd) = dummy_proof::<F, C, D>(&standard_config, 4_000, 4)?;
 
         let conf = generate_verifier_config(&proof)?;
         let (circom_constants, circom_gates) = generate_circom_verifier(&conf, &cd, &vd)?;
@@ -1182,35 +1180,36 @@ mod tests {
 
         let (proof, vd, cd) = dummy_proof::<F, C, D>(&standard_config, 4_000, 4)?;
 
-        // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
-        let high_rate_config = CircuitConfig {
-            fri_config: FriConfig {
-                rate_bits: 7,
-                proof_of_work_bits: 16,
-                num_query_rounds: 12,
-                ..standard_config.fri_config.clone()
-            },
-            ..standard_config
-        };
+        // // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
+        // let high_rate_config = CircuitConfig {
+        //     fri_config: FriConfig {
+        //         rate_bits: 7,
+        //         proof_of_work_bits: 16,
+        //         num_query_rounds: 12,
+        //         ..standard_config.fri_config.clone()
+        //     },
+        //     ..standard_config
+        // };
 
         let (proof, vd, cd) =
-            recursive_proof::<F, C, C, D>(proof, vd, cd, &high_rate_config, None, true, true)?;
+            recursive_proof::<F, C, C, D>(proof, vd, cd, &standard_config, None, true, true)?;
 
-        // A final proof, optimized for size.
-        let final_config = CircuitConfig {
-            num_routed_wires: 37,
-            fri_config: FriConfig {
-                rate_bits: 8,
-                cap_height: 0,
-                proof_of_work_bits: 20,
-                reduction_strategy: FriReductionStrategy::MinSize(None),
-                num_query_rounds: 10,
-            },
-            ..high_rate_config
-        };
+        // // A final proof, optimized for size.
+        // let final_config = CircuitConfig {
+        //     num_routed_wires: 37,
+        //     fri_config: FriConfig {
+        //         rate_bits: 8,
+        //         cap_height: 0,
+        //         proof_of_work_bits: 20,
+        //         reduction_strategy: FriReductionStrategy::MinSize(None),
+        //         num_query_rounds: 10,
+        //     },
+        //     ..high_rate_config
+        // };
+
         type CBn128 = PoseidonBN128GoldilocksConfig;
         let (proof, vd, cd) =
-            recursive_proof::<F, CBn128, C, D>(proof, vd, cd, &final_config, None, true, true)?;
+            recursive_proof::<F, CBn128, C, D>(proof, vd, cd, &standard_config, None, true, true)?;
 
         let conf = generate_verifier_config(&proof)?;
         let (circom_constants, circom_gates) = generate_circom_verifier(&conf, &cd, &vd)?;
