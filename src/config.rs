@@ -31,18 +31,66 @@ impl<F: RichField> PlonkyPermutation<F> for PoseidonBN128Permutation {
             );
 
             [
-                F::from_canonical_u64(if h.r0 >= F::ORDER {h.r0 - F::ORDER} else {h.r0} ),
-                F::from_canonical_u64(if h.r1 >= F::ORDER {h.r1 - F::ORDER} else {h.r1} ),
-                F::from_canonical_u64(if h.r2 >= F::ORDER {h.r2 - F::ORDER} else {h.r2} ),
-                F::from_canonical_u64(if h.r3 >= F::ORDER {h.r3 - F::ORDER} else {h.r3} ),
-                F::from_canonical_u64(if h.r4 >= F::ORDER {h.r4 - F::ORDER} else {h.r4} ),
-                F::from_canonical_u64(if h.r5 >= F::ORDER {h.r5 - F::ORDER} else {h.r5} ),
-                F::from_canonical_u64(if h.r6 >= F::ORDER {h.r6 - F::ORDER} else {h.r6} ),
-                F::from_canonical_u64(if h.r7 >= F::ORDER {h.r7 - F::ORDER} else {h.r7} ),
-                F::from_canonical_u64(if h.r8 >= F::ORDER {h.r8 - F::ORDER} else {h.r8} ),
-                F::from_canonical_u64(if h.r9 >= F::ORDER {h.r9 - F::ORDER} else {h.r9} ),
-                F::from_canonical_u64(if h.r10 >= F::ORDER {h.r10 - F::ORDER} else {h.r10} ),
-                F::from_canonical_u64(if h.r11 >= F::ORDER {h.r11 - F::ORDER} else {h.r11} ),
+                F::from_canonical_u64(if h.r0 >= F::ORDER {
+                    h.r0 - F::ORDER
+                } else {
+                    h.r0
+                }),
+                F::from_canonical_u64(if h.r1 >= F::ORDER {
+                    h.r1 - F::ORDER
+                } else {
+                    h.r1
+                }),
+                F::from_canonical_u64(if h.r2 >= F::ORDER {
+                    h.r2 - F::ORDER
+                } else {
+                    h.r2
+                }),
+                F::from_canonical_u64(if h.r3 >= F::ORDER {
+                    h.r3 - F::ORDER
+                } else {
+                    h.r3
+                }),
+                F::from_canonical_u64(if h.r4 >= F::ORDER {
+                    h.r4 - F::ORDER
+                } else {
+                    h.r4
+                }),
+                F::from_canonical_u64(if h.r5 >= F::ORDER {
+                    h.r5 - F::ORDER
+                } else {
+                    h.r5
+                }),
+                F::from_canonical_u64(if h.r6 >= F::ORDER {
+                    h.r6 - F::ORDER
+                } else {
+                    h.r6
+                }),
+                F::from_canonical_u64(if h.r7 >= F::ORDER {
+                    h.r7 - F::ORDER
+                } else {
+                    h.r7
+                }),
+                F::from_canonical_u64(if h.r8 >= F::ORDER {
+                    h.r8 - F::ORDER
+                } else {
+                    h.r8
+                }),
+                F::from_canonical_u64(if h.r9 >= F::ORDER {
+                    h.r9 - F::ORDER
+                } else {
+                    h.r9
+                }),
+                F::from_canonical_u64(if h.r10 >= F::ORDER {
+                    h.r10 - F::ORDER
+                } else {
+                    h.r10
+                }),
+                F::from_canonical_u64(if h.r11 >= F::ORDER {
+                    h.r11 - F::ORDER
+                } else {
+                    h.r11
+                }),
             ]
         }
     }

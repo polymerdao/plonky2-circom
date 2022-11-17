@@ -1,7 +1,7 @@
 CIRCUIT_NAME=plonky2
 CIRCUIT_PATH=../circuits/plonky2.circom
 INPUT_PATH=../test/data/proof.json
-POT_PATH=~/Downloads/powersOfTau28_hez_final_24.ptau
+POT_PATH=~/Downloads/powersOfTau28_hez_final_25.ptau
 RAPIDSNARK_PATH=../../../rapidsnark/build/prover
 # node version > 18
 NODE_PATH=node

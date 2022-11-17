@@ -898,8 +898,8 @@ pub fn generate_circom_verifier<
         if gate_name.eq("PublicInputGate")
             || gate_name[0..11].eq("BaseSumGate")
             || gate_name[0..12].eq("ConstantGate")
-            || gate_name[0..12].eq("ReducingGate")
             || gate_name[0..12].eq("PoseidonGate")
+            || gate_name[0..12].eq("ReducingGate")
             || gate_name[0..14].eq("ArithmeticGate")
             || gate_name[0..15].eq("PoseidonMdsGate")
             || gate_name[0..16].eq("MulExtensionGate")
@@ -934,12 +934,12 @@ pub fn generate_circom_verifier<
             }
             gates_lib += &*(code_str + "\n");
             last_component_name = component_name.clone();
-  //           eval_str += &*format!(
-  //               "  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {{
-  //   log(i, {}.out[i][0], {}.out[i][1]);
-  // }}\n",
-  //               &*component_name, &*component_name
-  //           );
+        //           eval_str += &*format!(
+        //               "  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {{
+        //   log(i, {}.out[i][0], {}.out[i][1]);
+        // }}\n",
+        //               &*component_name, &*component_name
+        //           );
         } else {
             todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
         }
