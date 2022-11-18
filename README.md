@@ -38,6 +38,7 @@ Supported custom gates:
 + [x] MulExtensionGate
 + [x] ExponentiationGate
 + [x] RandomAccessGate
++ [x] PoseidonMdsGate
 + [x] PoseidonGate
 
 Optional:

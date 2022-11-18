@@ -934,17 +934,10 @@ pub fn generate_circom_verifier<
             }
             gates_lib += &*(code_str + "\n");
             last_component_name = component_name.clone();
-        //           eval_str += &*format!(
-        //               "  for (var i = 0; i < NUM_GATE_CONSTRAINTS(); i++) {{
-        //   log(i, {}.out[i][0], {}.out[i][1]);
-        // }}\n",
-        //               &*component_name, &*component_name
-        //           );
         } else {
             todo!("{}", "gate not implemented: ".to_owned() + &gate_name)
         }
         evaluate_gate_constraints_str += &*eval_str;
-        // evaluate_gate_constraints_str += "\n";
     }
 
     evaluate_gate_constraints_str += &*("  out <== ".to_owned() + &*last_component_name + ".out;");
@@ -1123,29 +1116,6 @@ mod tests {
         type C = PoseidonBN128GoldilocksConfig;
         type F = <C as GenericConfig<D>>::F;
         let standard_config = CircuitConfig::standard_recursion_config();
-        // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
-        // let high_rate_config = CircuitConfig {
-        //     fri_config: FriConfig {
-        //         rate_bits: 7,
-        //         proof_of_work_bits: 16,
-        //         num_query_rounds: 12,
-        //         ..standard_config.fri_config.clone()
-        //     },
-        //     ..standard_config
-        // };
-        // // A final proof, optimized for size.
-        // let final_config = CircuitConfig {
-        //     num_routed_wires: 65,
-        //     fri_config: FriConfig {
-        //         rate_bits: 8,
-        //         cap_height: 0,
-        //         proof_of_work_bits: 20,
-        //         reduction_strategy: FriReductionStrategy::MinSize(None),
-        //         num_query_rounds: 10,
-        //     },
-        //     ..high_rate_config
-        // };
-
         let (proof, vd, cd) = dummy_proof::<F, C, D>(&standard_config, 4_000, 4)?;
 
         let conf = generate_verifier_config(&proof)?;
@@ -1179,33 +1149,8 @@ mod tests {
         let standard_config = CircuitConfig::standard_recursion_config();
 
         let (proof, vd, cd) = dummy_proof::<F, C, D>(&standard_config, 4_000, 4)?;
-
-        // // A high-rate recursive proof, designed to be verifiable with fewer routed wires.
-        // let high_rate_config = CircuitConfig {
-        //     fri_config: FriConfig {
-        //         rate_bits: 7,
-        //         proof_of_work_bits: 16,
-        //         num_query_rounds: 12,
-        //         ..standard_config.fri_config.clone()
-        //     },
-        //     ..standard_config
-        // };
-
         let (proof, vd, cd) =
             recursive_proof::<F, C, C, D>(proof, vd, cd, &standard_config, None, true, true)?;
-
-        // // A final proof, optimized for size.
-        // let final_config = CircuitConfig {
-        //     num_routed_wires: 37,
-        //     fri_config: FriConfig {
-        //         rate_bits: 8,
-        //         cap_height: 0,
-        //         proof_of_work_bits: 20,
-        //         reduction_strategy: FriReductionStrategy::MinSize(None),
-        //         num_query_rounds: 10,
-        //     },
-        //     ..high_rate_config
-        // };
 
         type CBn128 = PoseidonBN128GoldilocksConfig;
         let (proof, vd, cd) =
