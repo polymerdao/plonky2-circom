@@ -15,11 +15,14 @@ describe("Groth16", function () {
         text = text.replace(/]+/g, '');
         text = text.replace(/"+/g, '');
         const p = text.split(",");
-        assert.equal(p.length, 12);
+        let public_inputs = [];
+        for (let i = 0; i < p.length - 8; i++) {
+            public_inputs.push(p[8 + i]);
+        }
         expect(await verifier.verifyProof(
             [p[0], p[1]],
             [[p[2], p[3]], [p[4], p[5]]],
-            [p[6], p[7]], [p[8], p[9], p[10], p[11]]
+            [p[6], p[7]], public_inputs
         )).to.equal(true);
     });
 });

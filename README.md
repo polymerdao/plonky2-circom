@@ -3,6 +3,7 @@
 Updates
 -----
 
+- **11/17/2022** Added support for standard recursive config in Plonky2. Test results are in the last section.
 - **11/13/2022** Finished verification circuits for BN128 Poseidon based recursive Plonky2 proof. Test results are in the last section.
 - **11/10/2022** Implemented Circom circuits to support verification of a Plonky2 proof with public inputs and custom
   gates (constant, public inputs and Poseidon). Test results are in the last section.
@@ -19,7 +20,6 @@ Milestones
 This project reached the milestone to verify any recursive plonky2 proof with public inputs using the following
 settings:
 
-- High rate config
 - GoldilocksField
 - QuadraticExtension
 - Poseidon hasher
@@ -44,8 +44,90 @@ Optional:
 
 + [ ] Zero knowledge support
 
-Results
+Results using standard recursive config
 -----
+
+Test machine: 256GB RAM, 32 core GCP VM
+
+```shell
+****GENERATING RECURSIVE PLONKY2 PROOF****
+   Compiling plonky2 v0.1.0 (/home/sai/Project/polymer/plonky2/plonky2)
+   Compiling plonky2_circom_verifier v0.1.0 (/home/sai/Project/polymer/plonky2-circom)
+    Finished release [optimized] target(s) in 11.74s
+     Running unittests src/lib.rs (target/release/deps/plonky2_circom_verifier-447e0c9d88a5d800)
+running 1 test
+test verifier::tests::test_recursive_verifier ... ok
+successes:
+---- verifier::tests::test_recursive_verifier stdout ----
+######################### recursive verify #########################
+######################### recursive verify #########################
+Generating Circom files ...
+proof size: 127728
+successes:
+    verifier::tests::test_recursive_verifier
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 8.41s
+DONE (0s)
+****COMPILING CIRCUIT****
+template instances: 1000
+non-linear constraints: 29442894
+linear constraints: 0
+public inputs: 68
+public outputs: 0
+private inputs: 15877
+private outputs: 0
+wires: 29217264
+labels: 63028962
+Written successfully: ./plonky2.r1cs
+Written successfully: ./plonky2.sym
+Written successfully: ./plonky2_cpp/plonky2.cpp and ./plonky2_cpp/plonky2.dat
+Written successfully: ./plonky2_cpp/main.cpp, circom.hpp, calcwit.hpp, calcwit.cpp, fr.hpp, fr.cpp, fr.asm and Makefile
+Everything went okay, circom safe
+DONE (1178s)
+****COMPILING WITNESS GENERATOR****
+g++ -c main.cpp -std=c++11 -O3 -I.
+g++ -c calcwit.cpp -std=c++11 -O3 -I.
+g++ -c fr.cpp -std=c++11 -O3 -I.
+nasm -felf64 fr.asm -o fr_asm.o
+g++ -c plonky2.cpp -std=c++11 -O3 -I.
+g++ -o plonky2 *.o -lgmp 
+DONE (144s)
+****GENERATING ZKEY 0****
+DONE (12690s)
+****CONTRIBUTE TO PHASE 2 CEREMONY****
+DONE (1099s)
+****VERIFYING FINAL ZKEY (SKIP FOR TESTING)****
+DONE (0s)
+****EXPORTING VKEY****
+DONE (0s)
+****WITNESS GENERATION****
+DONE (7s)
+****GENERATING PROOF****
+DONE (38s)
+****VERIFYING PROOF****
+[INFO]  snarkJS: OK!
+DONE (1s)
+****SOLIDITY VERIFIER TEST****
+  Groth16
+    ✔ Should return true when proof is correct (2059ms)
+  1 passing (2s)
+
+****GENERATING A NEW RECURSIVE PLONKY2 PROOF****
+****WITNESS GENERATION****
+DONE (10s)
+****GENERATING PROOF****
+DONE (37s)
+****VERIFYING PROOF****
+[INFO]  snarkJS: OK!
+DONE (1s)
+****SOLIDITY VERIFIER TEST****
+  Groth16
+    ✔ Should return true when proof is correct (2079ms)
+  1 passing (2s)
+```
+
+Results using high rate recursive config
+-----
+
 
 Test machine: 32GB RAM, 24 core PC.
 

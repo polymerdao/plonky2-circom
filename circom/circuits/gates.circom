@@ -35,7 +35,7 @@ template EvalGateConstraints() {
   c_Constant2.public_input_hash <== public_input_hash;
   c_Constant2.constraints <== constraints;
 
-  // PoseidonMdsGate { _phantom: PhantomData }<WIDTH=12>
+  // PoseidonMdsGate { _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<WIDTH=12>
   component c_PoseidonMdsGate12 = PoseidonMdsGate12();
   c_PoseidonMdsGate12.constants <== constants;
   c_PoseidonMdsGate12.wires <== wires;
@@ -56,7 +56,7 @@ template EvalGateConstraints() {
   c_BaseSum63.public_input_hash <== public_input_hash;
   c_BaseSum63.constraints <== c_PublicInputGateLib.out;
 
-  // LowDegreeInterpolationGate { subgroup_bits: 4, _phantom: PhantomData }<D=2>
+  // LowDegreeInterpolationGate { subgroup_bits: 4, _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<D=2>
   component c_LowDegreeInterpolation4 = LowDegreeInterpolation4();
   c_LowDegreeInterpolation4.constants <== constants;
   c_LowDegreeInterpolation4.wires <== wires;
@@ -98,14 +98,14 @@ template EvalGateConstraints() {
   c_MultiplicationExtension13.public_input_hash <== public_input_hash;
   c_MultiplicationExtension13.constraints <== c_Arithmetic20.out;
 
-  // RandomAccessGate { bits: 4, num_copies: 4, num_extra_constants: 2, _phantom: PhantomData }<D=2>
+  // RandomAccessGate { bits: 4, num_copies: 4, num_extra_constants: 2, _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<D=2>
   component c_RandomAccessB4C4E2 = RandomAccessB4C4E2();
   c_RandomAccessB4C4E2.constants <== constants;
   c_RandomAccessB4C4E2.wires <== wires;
   c_RandomAccessB4C4E2.public_input_hash <== public_input_hash;
   c_RandomAccessB4C4E2.constraints <== c_MultiplicationExtension13.out;
 
-  // PoseidonGate { _phantom: PhantomData }<WIDTH=12>
+  // PoseidonGate { _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<WIDTH=12>
   component c_Poseidon12 = Poseidon12();
   c_Poseidon12.constants <== constants;
   c_Poseidon12.wires <== wires;
