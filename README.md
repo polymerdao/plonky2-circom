@@ -1,28 +1,13 @@
 # Plonky2 verifier in Circom
 
-Updates
------
+This code has not yet been audited, and should not be used in any production systems.
 
-- **11/17/2022** Added support for standard recursive config in Plonky2. Test results are in the last section.
-- **11/13/2022** Finished verification circuits for BN128 Poseidon based recursive Plonky2 proof. Test results are in the last section.
-- **11/10/2022** Implemented Circom circuits to support verification of a Plonky2 proof with public inputs and custom
-  gates (constant, public inputs and Poseidon). Test results are in the last section.
-- **11/03/2022** Switched to use BN128 field:
-    - Added range checks for Goldilocks arithmetic operations.
-    - Added generation of BN128 Poseidon based Plonky2 proof (30x slower than Goldilocks based Poseidon).
-    - Finished end-to-end tests for verify_fri_proof + get_challenges.
-    - Total non-linear constraints of the above Groth16 circuits is 8.4M. More results in the last section.
-- **10/22/2022** Finished get_challenges.
-- **10/20/2022** Finished circuits of verify_fri_proof with 1.2M non-linear constraints (native Goldilocks field).
-
-Milestones
------
 This project reached the milestone to verify any recursive plonky2 proof with public inputs using the following
 settings:
 
 - GoldilocksField
 - QuadraticExtension
-- Poseidon hasher
+- BN128 field based Poseidon hasher
 
 Supported custom gates:
 

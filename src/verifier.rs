@@ -249,7 +249,6 @@ pub fn generate_proof_base64<
     pwpi: &ProofWithPublicInputs<F, C, D>,
     conf: &VerifierConfig,
 ) -> anyhow::Result<String> {
-    // total size: 75
     let mut proof_size: usize =
         (conf.num_wires_cap + conf.num_plonk_zs_partial_products_cap + conf.num_quotient_polys_cap)
             * conf.hash_size;
@@ -279,7 +278,6 @@ pub fn generate_proof_base64<
         }
     }
 
-    // total size: 3355
     proof_size += (conf.num_openings_constants
         + conf.num_openings_plonk_sigmas
         + conf.num_openings_wires
@@ -360,7 +358,6 @@ pub fn generate_proof_base64<
         .to_string();
     }
 
-    // 3405
     proof_size += (conf.num_fri_commit_round * conf.fri_commit_merkle_cap_height) * conf.hash_size;
 
     let mut fri_commit_phase_merkle_caps =
@@ -378,7 +375,6 @@ pub fn generate_proof_base64<
         }
     }
 
-    // 39685
     proof_size += conf.num_fri_query_round
         * ((conf.num_fri_query_init_constants_sigmas_v
             + conf.num_fri_query_init_wires_v
@@ -392,7 +388,6 @@ pub fn generate_proof_base64<
                 * conf.hash_size
             + conf.merkle_height_size * 4);
 
-    // 50015
     proof_size += conf.num_fri_query_round
         * (conf.num_fri_query_step0_v * conf.ext_field_size
             + conf.num_fri_query_step0_p * conf.hash_size
@@ -582,7 +577,6 @@ pub fn generate_proof_base64<
         }
     }
 
-    // 51039
     proof_size += conf.num_fri_final_poly_ext_v * conf.ext_field_size;
 
     let mut fri_final_poly_ext_v = vec![vec!["0".to_string(); 2]; conf.num_fri_final_poly_ext_v];
@@ -597,7 +591,6 @@ pub fn generate_proof_base64<
             .to_string();
     }
 
-    // 51047
     proof_size += conf.field_size;
 
     proof_size += conf.num_public_inputs * conf.field_size;

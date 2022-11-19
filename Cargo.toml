@@ -4,10 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-#plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "8c33c907" }
-#plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "8c33c907" }
-plonky2 = { path = "../plonky2/plonky2" }
-plonky2_util = { path = "../plonky2/util" }
+plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "ff08216d" }
+plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "ff08216d" }
+poseidon-permutation = { git = "https://github.com/polymerdao/poseidon-permutation-rs", rev = "216a926a" }
 anyhow = "1.0.65"
 log = "0.4.17"
 env_logger = "0.9.1"
@@ -17,8 +16,6 @@ serde_json = "1.0.86"
 keccak-hash = "0.10.0"
 sha2 = "0.10.6"
 itertools = "0.10.5"
-#poseidon-rs = "0.0.8"
-poseidon-permutation = { path = "../poseidon-permutation-rs" }
 num = { version = "0.4", features = [ "rand" ] }
 
 [dev-dependencies]
