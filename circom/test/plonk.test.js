@@ -23,18 +23,18 @@ describe("Plonk eval_l1 Circuit Test", function () {
     });
 });
 
-describe("Plonk Check Zeta Circuit Test", function () {
-    let circuit;
-
-    this.timeout(10000000);
-
-    before(async () => {
-        circuit = await wasm_tester(path.join(__dirname, "circuits", "checkzeta.test.circom"), {});
-    });
-
-    it("Should pass", async () => {
-        const w = await circuit.calculateWitness(proof, true);
-
-        await circuit.assertOut(w, {});
-    });
-});
+// describe("Plonk Check Zeta Circuit Test", function () {
+//     let circuit;
+//
+//     this.timeout(10000000);
+//
+//     before(async () => {
+//         circuit = await wasm_tester(path.join(__dirname, "circuits", "checkzeta.test.circom"), {});
+//     });
+//
+//     it("Should pass", async () => {
+//         const w = await circuit.calculateWitness(proof, true);
+//
+//         await circuit.assertOut(w, {});
+//     });
+// });

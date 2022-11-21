@@ -11,7 +11,7 @@ describe("Verify Challenges Circuit Test", function () {
     this.timeout(10000000);
 
     before(async () => {
-        circuit = await wasm_tester(path.join(__dirname, "circuits", "challenges.test.circom"), {});
+        // circuit = await wasm_tester(path.join(__dirname, "circuits", "challenges.test.circom"), {});
     });
 
     it("Should pass", async () => {
@@ -35,17 +35,17 @@ describe("Verify Challenges Circuit Test", function () {
 
         fs.writeFileSync('challenges_input.json', JSON.stringify(input));
 
-        const w = await circuit.calculateWitness(input, true);
-
-        await circuit.assertOut(w, {
-            plonk_betas: challenges.plonk_betas,
-            plonk_gammas: challenges.plonk_gammas,
-            plonk_alphas: challenges.plonk_alphas,
-            plonk_zeta: challenges.plonk_zeta,
-            fri_alpha: challenges.fri_alpha,
-            fri_betas: challenges.fri_betas,
-            fri_pow_response: challenges.fri_pow_response[0],
-            fri_query_indices: challenges.fri_query_indices,
-        });
+        // const w = await circuit.calculateWitness(input, true);
+        //
+        // await circuit.assertOut(w, {
+        //     plonk_betas: challenges.plonk_betas,
+        //     plonk_gammas: challenges.plonk_gammas,
+        //     plonk_alphas: challenges.plonk_alphas,
+        //     plonk_zeta: challenges.plonk_zeta,
+        //     fri_alpha: challenges.fri_alpha,
+        //     fri_betas: challenges.fri_betas,
+        //     fri_pow_response: challenges.fri_pow_response[0],
+        //     fri_query_indices: challenges.fri_query_indices,
+        // });
     });
 });

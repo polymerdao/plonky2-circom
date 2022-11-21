@@ -634,7 +634,7 @@ pub fn generate_proof_base64<
         public_inputs,
     };
 
-    let proof_bytes = pwpi.to_bytes()?;
+    let proof_bytes = pwpi.to_bytes();
     assert_eq!(proof_bytes.len(), proof_size);
     println!("proof size: {}", proof_size);
 
