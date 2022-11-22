@@ -37,32 +37,37 @@ Test machine: 256GB RAM, 32 core GCP VM
 
 ```shell
 ****GENERATING RECURSIVE PLONKY2 PROOF****
-   Compiling plonky2 v0.1.0 (/home/sai/Project/polymer/plonky2/plonky2)
-   Compiling plonky2_circom_verifier v0.1.0 (/home/sai/Project/polymer/plonky2-circom)
-    Finished release [optimized] target(s) in 11.74s
-     Running unittests src/lib.rs (target/release/deps/plonky2_circom_verifier-447e0c9d88a5d800)
+    Finished release [optimized] target(s) in 0.06s
+     Running unittests src/lib.rs (target/release/deps/plonky2_circom_verifier-5ffbd921631d1f4c)
+
 running 1 test
 test verifier::tests::test_recursive_verifier ... ok
+
 successes:
+
 ---- verifier::tests::test_recursive_verifier stdout ----
 ######################### recursive verify #########################
 ######################### recursive verify #########################
 Generating Circom files ...
 proof size: 127728
+
+
 successes:
     verifier::tests::test_recursive_verifier
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 8.41s
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 8.69s
+
 DONE (0s)
 ****COMPILING CIRCUIT****
-template instances: 1000
-non-linear constraints: 29442894
+template instances: 999
+non-linear constraints: 29442900
 linear constraints: 0
 public inputs: 68
 public outputs: 0
 private inputs: 15877
 private outputs: 0
-wires: 29217264
-labels: 63028962
+wires: 29217270
+labels: 63028953
 Written successfully: ./plonky2.r1cs
 Written successfully: ./plonky2.sym
 Written successfully: ./plonky2_cpp/plonky2.cpp and ./plonky2_cpp/plonky2.dat
@@ -76,39 +81,69 @@ g++ -c fr.cpp -std=c++11 -O3 -I.
 nasm -felf64 fr.asm -o fr_asm.o
 g++ -c plonky2.cpp -std=c++11 -O3 -I.
 g++ -o plonky2 *.o -lgmp 
-DONE (144s)
+DONE (140s)
+****WITNESS GENERATION****
+DONE (9s)
 ****GENERATING ZKEY 0****
-DONE (12690s)
+DONE (12580s)
 ****CONTRIBUTE TO PHASE 2 CEREMONY****
-DONE (1099s)
+DONE (1149s)
 ****VERIFYING FINAL ZKEY (SKIP FOR TESTING)****
 DONE (0s)
 ****EXPORTING VKEY****
-DONE (0s)
-****WITNESS GENERATION****
-DONE (7s)
+DONE (1s)
 ****GENERATING PROOF****
 DONE (38s)
 ****VERIFYING PROOF****
 [INFO]  snarkJS: OK!
 DONE (1s)
 ****SOLIDITY VERIFIER TEST****
+Compiled 1 Solidity file successfully
+
+
   Groth16
-    ✔ Should return true when proof is correct (2059ms)
+    ✔ Should return true when proof is correct (2055ms)
+
+
   1 passing (2s)
 
 ****GENERATING A NEW RECURSIVE PLONKY2 PROOF****
+    Finished release [optimized] target(s) in 0.06s
+     Running unittests src/lib.rs (target/release/deps/plonky2_circom_verifier-5ffbd921631d1f4c)
+
+running 1 test
+test verifier::tests::test_recursive_verifier ... ok
+
+successes:
+
+---- verifier::tests::test_recursive_verifier stdout ----
+######################### recursive verify #########################
+######################### recursive verify #########################
+Generating Circom files ...
+proof size: 127728
+
+
+successes:
+    verifier::tests::test_recursive_verifier
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 8.49s
+
 ****WITNESS GENERATION****
 DONE (10s)
 ****GENERATING PROOF****
-DONE (37s)
+DONE (36s)
 ****VERIFYING PROOF****
 [INFO]  snarkJS: OK!
 DONE (1s)
 ****SOLIDITY VERIFIER TEST****
+
+
   Groth16
-    ✔ Should return true when proof is correct (2079ms)
+    ✔ Should return true when proof is correct (2059ms)
+
+
   1 passing (2s)
+
 ```
 
 Results using high rate recursive config

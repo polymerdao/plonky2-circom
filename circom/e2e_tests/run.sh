@@ -20,6 +20,12 @@ cd ${CIRCUIT_NAME}_cpp && make -j && cd ..
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 
+echo "****WITNESS GENERATION****"
+start=$(date +%s)
+./${CIRCUIT_NAME}_cpp/${CIRCUIT_NAME} ${INPUT_PATH} ./witness.wtns
+end=$(date +%s)
+echo "DONE ($((end - start))s)"
+
 echo "****GENERATING ZKEY 0****"
 # If failed: https://hackmd.io/@yisun/BkT0RS87q
 start=$(date +%s)
@@ -43,12 +49,6 @@ echo "DONE ($((end - start))s)"
 echo "****EXPORTING VKEY****"
 start=$(date +%s)
 ${NODE_PATH} ${SNARKJS_PATH} zkey export verificationkey "$CIRCUIT_NAME".zkey verification_key.json -v
-end=$(date +%s)
-echo "DONE ($((end - start))s)"
-
-echo "****WITNESS GENERATION****"
-start=$(date +%s)
-./${CIRCUIT_NAME}_cpp/${CIRCUIT_NAME} ${INPUT_PATH} ./witness.wtns
 end=$(date +%s)
 echo "DONE ($((end - start))s)"
 

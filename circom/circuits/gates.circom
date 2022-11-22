@@ -35,7 +35,7 @@ template EvalGateConstraints() {
   c_Constant2.public_input_hash <== public_input_hash;
   c_Constant2.constraints <== constraints;
 
-  // PoseidonMdsGate { _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<WIDTH=12>
+  // PoseidonMdsGate(PhantomData<plonky2_field::goldilocks_field::GoldilocksField>)<WIDTH=12>
   component c_PoseidonMdsGate12 = PoseidonMdsGate12();
   c_PoseidonMdsGate12.constants <== constants;
   c_PoseidonMdsGate12.wires <== wires;
@@ -105,7 +105,7 @@ template EvalGateConstraints() {
   c_RandomAccessB4C4E2.public_input_hash <== public_input_hash;
   c_RandomAccessB4C4E2.constraints <== c_MultiplicationExtension13.out;
 
-  // PoseidonGate { _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<WIDTH=12>
+  // PoseidonGate(PhantomData<plonky2_field::goldilocks_field::GoldilocksField>)<WIDTH=12>
   component c_Poseidon12 = Poseidon12();
   c_Poseidon12.constants <== constants;
   c_Poseidon12.wires <== wires;
