@@ -20,59 +20,37 @@ template GetMerkleProofToCap(nLeaf, nProof) {
       c_digest.capacity[i] <== 0;
   }
 
-  component poseidon0[nProof];
-  component poseidon1[nProof];
+  component poseidon[nProof];
   component shift[nProof];
   signal cur_digest[nProof + 1][4];
 
   shift[0] = RShift1();
   shift[0].x <== leaf_index;
-  cur_digest[0][0] <== c_digest.out[0];
-  cur_digest[0][1] <== c_digest.out[1];
-  cur_digest[0][2] <== c_digest.out[2];
-  cur_digest[0][3] <== c_digest.out[3];
+  for (var i = 0; i < 4; i++) {
+    cur_digest[0][i] <== c_digest.out[i];
+  }
 
-  signal tmp0[nProof];
-  signal tmp1[nProof];
-  signal tmp2[nProof];
-  signal tmp3[nProof];
+  signal in0[nProof][4];
+  signal in1[nProof][4];
   for (var i = 0; i < nProof; i++) {
-    poseidon0[i] = Poseidon_BN(4);
-    poseidon0[i].in[0] <== cur_digest[i][0];
-    poseidon0[i].in[1] <== cur_digest[i][1];
-    poseidon0[i].in[2] <== cur_digest[i][2];
-    poseidon0[i].in[3] <== cur_digest[i][3];
-    poseidon0[i].in[4] <== proof[i][0];
-    poseidon0[i].in[5] <== proof[i][1];
-    poseidon0[i].in[6] <== proof[i][2];
-    poseidon0[i].in[7] <== proof[i][3];
-    poseidon0[i].capacity[0] <== 0;
-    poseidon0[i].capacity[1] <== 0;
-    poseidon0[i].capacity[2] <== 0;
-    poseidon0[i].capacity[3] <== 0;
+    poseidon[i] = Poseidon_BN(4);
 
-    poseidon1[i] = Poseidon_BN(4);
-    poseidon1[i].in[0] <== proof[i][0];
-    poseidon1[i].in[1] <== proof[i][1];
-    poseidon1[i].in[2] <== proof[i][2];
-    poseidon1[i].in[3] <== proof[i][3];
-    poseidon1[i].in[4] <== cur_digest[i][0];
-    poseidon1[i].in[5] <== cur_digest[i][1];
-    poseidon1[i].in[6] <== cur_digest[i][2];
-    poseidon1[i].in[7] <== cur_digest[i][3];
-    poseidon1[i].capacity[0] <== 0;
-    poseidon1[i].capacity[1] <== 0;
-    poseidon1[i].capacity[2] <== 0;
-    poseidon1[i].capacity[3] <== 0;
+    for (var j = 0; j < 4; j++) {
+      in0[i][j] <== (1 - shift[i].bit) * cur_digest[i][j];
+      poseidon[i].in[j] <== in0[i][j] + shift[i].bit * proof[i][j];
+    }
+    for (var j = 0; j < 4; j++) {
+      in1[i][j] <== (1 - shift[i].bit) * proof[i][j];
+      poseidon[i].in[j + 4] <== in1[i][j] + shift[i].bit * cur_digest[i][j];
+    }
 
-    tmp0[i] <== (1 - shift[i].bit) * poseidon0[i].out[0];
-    tmp1[i] <== (1 - shift[i].bit) * poseidon0[i].out[1];
-    tmp2[i] <== (1 - shift[i].bit) * poseidon0[i].out[2];
-    tmp3[i] <== (1 - shift[i].bit) * poseidon0[i].out[3];
-    cur_digest[i + 1][0] <== tmp0[i] + shift[i].bit * poseidon1[i].out[0];
-    cur_digest[i + 1][1] <== tmp1[i] + shift[i].bit * poseidon1[i].out[1];
-    cur_digest[i + 1][2] <== tmp2[i] + shift[i].bit * poseidon1[i].out[2];
-    cur_digest[i + 1][3] <== tmp3[i] + shift[i].bit * poseidon1[i].out[3];
+    for (var j = 0; j < 4; j++) {
+      poseidon[i].capacity[j] <== 0;
+    }
+
+    for (var j = 0; j < 4; j++) {
+      cur_digest[i + 1][j] <== poseidon[i].out[j];
+    }
 
     if (i < nProof - 1) {
       shift[i + 1] = RShift1();
@@ -80,10 +58,9 @@ template GetMerkleProofToCap(nLeaf, nProof) {
     }
   }
 
-  digest[0] <== cur_digest[nProof][0];
-  digest[1] <== cur_digest[nProof][1];
-  digest[2] <== cur_digest[nProof][2];
-  digest[3] <== cur_digest[nProof][3];
+  for (var i = 0; i < 4; i++) {
+    digest[i] <== cur_digest[nProof][i];
+  }
   index <== shift[nProof - 1].out;
 }
 
