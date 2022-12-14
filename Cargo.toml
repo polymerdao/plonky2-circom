@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "a5bac7d81d653a343bb791850ca308dfabedddcf" }
-plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "a5bac7d81d653a343bb791850ca308dfabedddcf" }
-poseidon-permutation = { git = "https://github.com/polymerdao/poseidon-permutation-rs"}
+plonky2 = { git = "https://github.com/polymerdao/plonky2", rev = "4cb0b48df1d227d5461a4c28ed025aaea64e2e62" }
+plonky2_util = { git = "https://github.com/polymerdao/plonky2", rev = "4cb0b48df1d227d5461a4c28ed025aaea64e2e62" }
+poseidon-permutation = { path = "../poseidon-permutation-rs"}
 anyhow = "1.0.65"
 log = "0.4.17"
 env_logger = "0.9.1"
