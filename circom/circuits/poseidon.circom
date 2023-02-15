@@ -284,8 +284,11 @@ template HashNoPad_BN(nInputs, nOutputs) {
         }
     }
 
+    component cGlReduce[nOutputs];
     for (var i = 0; i < nOutputs; i++) {
-        out[i] <== cPoseidon[nHash - 1].out[i];
+        cGlReduce[i] = GlReduce(1);
+        cGlReduce[i].x <== cPoseidon[nHash - 1].out[i];
+        out[i] <== cGlReduce[i].out;
     }
 }
 
