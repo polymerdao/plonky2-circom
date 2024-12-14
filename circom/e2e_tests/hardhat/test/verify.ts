@@ -1,6 +1,6 @@
 import {ethers} from "hardhat";
 import "@nomiclabs/hardhat-etherscan";
-import {assert, expect} from "chai";
+import {expect} from "chai";
 
 describe("Groth16", function () {
     it("Should return true when proof is correct", async function () {
