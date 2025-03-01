@@ -139,7 +139,8 @@ template VerifyFriProof() {
 
   // fri_verify_proof_of_work
   component check = LessNBits(64 - MIN_FRI_POW_RESPONSE());
-  check.x <== fri_pow_response;
+check.x <== fri_pow_response;
+assert(check.out == 1);
 
   component c_gl_mul[NUM_FRI_QUERY_ROUND()][1];
   component c_gl_exp[NUM_FRI_QUERY_ROUND()][1];
