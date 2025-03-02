@@ -7,7 +7,7 @@
 // 2019 OKIMS
 //      ported to solidity 0.6
 //      fixed linter warnings
-//      added requiere error messages
+//      added require error messages
 //
 //
 // SPDX-License-Identifier: GPL-3.0
